@@ -3,6 +3,9 @@ import { Header } from './pages/header';
 import { Login } from './pages/login';
 import { Register } from './pages/register';
 import { Profile } from './pages/profile';
+import { Home } from './pages/home';
+import { Settings } from './pages/settings';
+import { Article } from './pages/article';
 
 import './App.css';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
@@ -13,10 +16,11 @@ const App: React.FC = () => {
       <Router>
         <Header />
         <Switch>
-          <Route exact path="/" component={Login} />
+          <Route exact path="/" component={Home} />
           <Route path={"/register"} component={Register} />
           <Route path={"/login"} component={Login} />
-          <Route path={"/article/:id"} component={Profile} />
+          <Route path={"/settings"} component={Settings} />
+          <Route path={"/article/:id"} component={Article} />
           <Route path={"/profile/:username"} component={Profile} />
           <Route component={Register} />
         </Switch>
