@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-class Settings extends React.Component {
+export class Settings extends React.Component {
     render() {
         return <div className="settings-page">
             <div className="container page">

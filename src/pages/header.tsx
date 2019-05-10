@@ -6,7 +6,7 @@ class Header extends React.Component {
         return <div className="auth-page">
             <nav className="navbar navbar-light">
                 <div className="container">
-                    <a className="navbar-brand" href="index.html">conduit</a>
+                    <Link to={"/"} className="navbar-brand" href="index.html">conduit</Link>
                     <ul className="nav navbar-nav pull-xs-right">
                         <li className="nav-item">
                             <Link to={"/"} className="nav-link active">&nbsp;Home</Link>

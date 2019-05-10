@@ -1,8 +1,24 @@
 import * as React from 'react';
+import { ArticlePreview } from '../components/article-preview';
+import { TagsSidebar } from '../components/tags-sidebar';
+import { RouteComponentProps, match } from 'react-router-dom';
 
 
-class Home extends React.Component {
+const tags = [
+    "programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"
+]
 
+interface IMatchParams {
+    tag: string;
+}
+
+interface IProps extends RouteComponentProps<IMatchParams> {
+}
+
+export class Home extends React.Component<IProps> {
+    constructor(props: IProps) {
+        super(props);
+    }
     render() {
         return <div className="home-page">
 
@@ -15,12 +31,11 @@ class Home extends React.Component {
 
             <div className="container page">
                 <div className="row">
-
                     <div className="col-md-9">
                         <div className="feed-toggle">
                             <ul className="nav nav-pills outline-active">
                                 <li className="nav-item">
-                                    <a className="nav-link disabled" href="">Your Feed</a>
+                                    <a className="nav-link disabled" href="">{this.props.match.params.tag}</a>
                                 </li>
                                 <li className="nav-item">
                                     <a className="nav-link active" href="">Global Feed</a>
@@ -28,59 +43,29 @@ class Home extends React.Component {
                             </ul>
                         </div>
 
-                        <div className="article-preview">
-                            <div className="article-meta">
-                                <a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
-                                <div className="info">
-                                    <a href="" className="author">Eric Simons</a>
-                                    <span className="date">January 20th</span>
-                                </div>
-                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                                    <i className="ion-heart"></i> 29
-                  </button>
-                            </div>
-                            <a href="" className="preview-link">
-                                <h1>How to build webapps that scale</h1>
-                                <p>This is the description for the post.</p>
-                                <span>Read more...</span>
-                            </a>
-                        </div>
+                        <ArticlePreview
+                            img={"http://i.imgur.com/Qr71crq.jpg"}
+                            name={"Eric Simons"}
+                            date={"January 20th"}
+                            articleName={"How to build webapps that scale"}
+                            hearts={29}
+                            description={"This is the description for the post."}
+                        />
 
-                        <div className="article-preview">
-                            <div className="article-meta">
-                                <a href="profile.html"><img src="http://i.imgur.com/N4VcUeJ.jpg" /></a>
-                                <div className="info">
-                                    <a href="" className="author">Albert Pai</a>
-                                    <span className="date">January 20th</span>
-                                </div>
-                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                                    <i className="ion-heart"></i> 32
-                  </button>
-                            </div>
-                            <a href="" className="preview-link">
-                                <h1>The song you won't ever stop singing. No matter how hard you try.</h1>
-                                <p>This is the description for the post.</p>
-                                <span>Read more...</span>
-                            </a>
-                        </div>
+                        <ArticlePreview
+                            img={"http://i.imgur.com/N4VcUeJ.jpg"}
+                            name={"Albert Pai"}
+                            date={"January 20th"}
+                            articleName={"The song you won't ever stop singing. No matter how hard you try."}
+                            hearts={32}
+                            description={"This is the description for the post."}
+                        />
 
                     </div>
-
                     <div className="col-md-3">
-                        <div className="sidebar">
-                            <p>Popular Tags</p>
-
-                            <div className="tag-list">
-                                <a href="" className="tag-pill tag-default">programming</a>
-                                <a href="" className="tag-pill tag-default">javascript</a>
-                                <a href="" className="tag-pill tag-default">emberjs</a>
-                                <a href="" className="tag-pill tag-default">angularjs</a>
-                                <a href="" className="tag-pill tag-default">react</a>
-                                <a href="" className="tag-pill tag-default">mean</a>
-                                <a href="" className="tag-pill tag-default">node</a>
-                                <a href="" className="tag-pill tag-default">rails</a>
-                            </div>
-                        </div>
+                        <TagsSidebar
+                            tags={tags}
+                        />
                     </div>
 
                 </div>
