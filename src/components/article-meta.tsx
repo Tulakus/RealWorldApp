@@ -5,7 +5,7 @@ export interface IProps {
     name?: string;
     date?: string;
     hearts?: number;
-    followers?: number;
+    followers?: boolean;
 }
 
 export class ArticleMeta extends React.Component<IProps> {

@@ -8,6 +8,7 @@ export interface IProps {
     articleName: string;
     description: string;
     hearts: number;
+    slug: string;
 }
 
 export class ArticlePreview extends React.Component<IProps, {}> {
@@ -26,7 +27,7 @@ export class ArticlePreview extends React.Component<IProps, {}> {
                     <i className="ion-heart"></i> {this.props.hearts}
                 </button>
             </div>
-            <Link to={`/article/${this.props.articleName}`} className="preview-link">
+            <Link to={`/article/${this.props.slug}`} className="preview-link">
                 <h1>{this.props.articleName}</h1>
                 <p>{this.props.description}</p>
                 <span>Read more...</span>

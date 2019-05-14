@@ -9,7 +9,7 @@ export interface IProps {
     date?: string;
     title?: string;
     hearts?: number;
-    followers?: number;
+    followers?: boolean;
 }
 
 export class ArticleBanner extends React.Component<IProps> {

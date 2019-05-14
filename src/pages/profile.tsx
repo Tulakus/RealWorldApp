@@ -56,6 +56,7 @@ class Profile extends React.Component<Props> {
                             articleName={"How to build webapps that scale"}
                             description={"This is the description for the post."}
                             hearts={29}
+                            slug={"slug"}
                         />
                     </div>
 

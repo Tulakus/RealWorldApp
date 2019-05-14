@@ -6,6 +6,8 @@ import { Sidebar } from '../components/sidebar';
 
 import { RouteComponentProps, Link } from 'react-router-dom';
 import * as request from 'superagent';
+import { IArticle } from '../interfaces/IArticle';
+import { getDate } from '../helpers/helper';
 
 
 const tags = [
@@ -19,23 +21,7 @@ interface IMatchParams {
 interface IProps extends RouteComponentProps<IMatchParams> {
 }
 
-interface IArticle {
-    title: string,
-    slug: string,
-    body: string,
-    createdAt: string,
-    updatedAt: string,
-    tagList: string[],
-    description: string,
-    author: {
-        username: string,
-        bio: null,
-        image: string,
-        following: boolean
-    },
-    favorited: boolean,
-    favoritesCount: number
-}
+
 
 interface IState {
     articles: IArticle[],
@@ -48,22 +34,18 @@ interface IState {
 export class Home extends React.Component<IProps, IState> {
     readonly state: IState = { articles: [], articlesCount: 0, tags: [], tag: "", isLoading: true }
     componentDidMount() {
-        var all_articles = request
+        const all_articles = request
             .get('https://conduit.productionready.io/api/articles')
             .query({
                 "limit": 10,
                 "offset": 0
-            })
-        //.then(resp => this.setState(resp.body));
-
-        var tags = request
+            });
+        const tags = request
             .get('https://conduit.productionready.io/api/tags')
-        //.then(resp => this.setState(resp.body));
 
         Promise.all([all_articles, tags])
             .then(value => value.forEach(i => this.setState(i.body)))
             .then(() => this.setState({ isLoading: false }));
-        //this.setState({ isLoading: false });
     }
     componentDidUpdate(prevProps: IProps, prevState: IState) {
         if (prevState.tag === this.state.tag) {
@@ -85,6 +67,7 @@ export class Home extends React.Component<IProps, IState> {
     handle2 = (e: string) =>
         this.setState({ tag: e, isLoading: true })
     render() {
+        let isActive = this.state.tag !== "";
         return <div className="home-page">
 
             <div className="banner">
@@ -100,10 +83,10 @@ export class Home extends React.Component<IProps, IState> {
                         <div className="feed-toggle">
                             <ul className="nav nav-pills outline-active">
                                 <li className="nav-item" onClick={e => this.handle}>
-                                    <a href="" className="nav-link active" >Global Feed</a>
+                                    <a href="" className={isActive ? "nav-link" : "nav-link active"}  >Global Feed</a>
                                 </li>
                                 {this.state.tag !== "" && <li className="nav-item">
-                                    <a className="nav-link active" href="/" onClick={e => e.preventDefault()} >{this.state.tag}</a>
+                                    <a className={isActive ? "nav-link active" : "nav-link"} href="/" onClick={e => e.preventDefault()} >{'#' + this.state.tag}</a>
                                 </li>}
 
                             </ul>
@@ -118,6 +101,7 @@ export class Home extends React.Component<IProps, IState> {
                                     articleName={i.title}
                                     hearts={i.favoritesCount}
                                     description={i.description}
+                                    slug={i.slug}
                                 />)}
                     </div>
                     <div className="col-md-3">
@@ -141,11 +125,3 @@ export class Home extends React.Component<IProps, IState> {
 }
 
 
-const getDate = (date: string) => {
-    const tempDate = new Date(date);
-    const a = tempDate.toLocaleDateString("en-us", {
-        month: 'long',
-        day: 'numeric'
-    })
-    return `${a}th`
-}

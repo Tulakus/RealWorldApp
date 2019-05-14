@@ -20,7 +20,7 @@ const App: React.FC = () => {
           <Route path={"/register"} component={Register} />
           <Route path={"/login"} component={Login} />
           <Route path={"/settings"} component={Settings} />
-          <Route path={"/article/:id"} component={Article} />
+          <Route path={"/article/:slug"} component={Article} />
           <Route path={"/profile/:username"} component={Profile} />
           <Route component={Register} />
         </Switch>
