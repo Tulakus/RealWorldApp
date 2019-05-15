@@ -28,11 +28,11 @@ interface IState {
     tags: string[]
     articlesCount: number,
     tag: string,
-    isLoading: boolean
+    isFetchingData: boolean
 }
 
 export class Home extends React.Component<IProps, IState> {
-    readonly state: IState = { articles: [], articlesCount: 0, tags: [], tag: "", isLoading: true }
+    readonly state: IState = { articles: [], articlesCount: 0, tags: [], tag: "", isFetchingData: true }
     componentDidMount() {
         const all_articles = request
             .get('https://conduit.productionready.io/api/articles')
@@ -45,7 +45,7 @@ export class Home extends React.Component<IProps, IState> {
 
         Promise.all([all_articles, tags])
             .then(value => value.forEach(i => this.setState(i.body)))
-            .then(() => this.setState({ isLoading: false }));
+            .then(() => this.setState({ isFetchingData: false }));
     }
     componentDidUpdate(prevProps: IProps, prevState: IState) {
         if (prevState.tag === this.state.tag) {
@@ -58,14 +58,14 @@ export class Home extends React.Component<IProps, IState> {
                 "tag": this.state.tag
             })
             .then(resp => this.setState(resp.body))
-            .then(() => this.setState({ tag: this.state.tag, isLoading: false }));
+            .then(() => this.setState({ tag: this.state.tag, isFetchingData: false }));
     }
     handle(e: React.MouseEvent<HTMLElement>) {
         alert(e.target)
-        this.setState({ tag: "", isLoading: true });
+        this.setState({ tag: "", isFetchingData: true });
     }
     handle2 = (e: string) =>
-        this.setState({ tag: e, isLoading: true })
+        this.setState({ tag: e, isFetchingData: true })
     render() {
         let isActive = this.state.tag !== "";
         return <div className="home-page">
@@ -91,7 +91,7 @@ export class Home extends React.Component<IProps, IState> {
 
                             </ul>
                         </div>
-                        {this.state.isLoading === true
+                        {this.state.isFetchingData === true
                             ? <div>Loading content...</div>
                             : this.state.articles.length > 0 && this.state.articles.map(i =>
                                 <ArticlePreview
@@ -109,7 +109,7 @@ export class Home extends React.Component<IProps, IState> {
                             <Sidebar
                                 title={'Popular Tags'}>
 
-                                {this.state.isLoading === true
+                                {this.state.isFetchingData === true
                                     ? <div>Loading content...</div>
                                     : <TagsList
                                         tags={this.state.tags}

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link } from 'react-router-dom';
+import { getDate } from '../helpers/helper';
 
 export interface IProps {
     img: string;
@@ -21,7 +22,7 @@ export class ArticlePreview extends React.Component<IProps, {}> {
                 <Link to={`/profile/${this.props.name}`}><img src={this.props.img} /></Link>
                 <div className="info">
                     <Link to={`/profile/${this.props.name}`} className="author">{this.props.name}</Link>
-                    <span className="date">{this.props.date}</span>
+                    <span className="date">{getDate(this.props.date)}</span>
                 </div>
                 <button className="btn btn-outline-primary btn-sm pull-xs-right">
                     <i className="ion-heart"></i> {this.props.hearts}

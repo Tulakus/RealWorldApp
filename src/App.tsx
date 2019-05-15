@@ -21,7 +21,7 @@ const App: React.FC = () => {
           <Route path={"/login"} component={Login} />
           <Route path={"/settings"} component={Settings} />
           <Route path={"/article/:slug"} component={Article} />
-          <Route path={"/profile/:username"} component={Profile} />
+          <Route path={"/profile/:username/:favorited?"} component={Profile} />
           <Route component={Register} />
         </Switch>
       </Router>
