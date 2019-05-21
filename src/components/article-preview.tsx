@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link } from 'react-router-dom';
 import { getDate } from '../helpers/helper';
+import * as request from 'superagent';
 
 export interface IProps {
     img: string;
@@ -8,15 +9,33 @@ export interface IProps {
     date: string;
     articleName: string;
     description: string;
-    hearts: number;
+    favoriteCount: number;
+    favorited: boolean;
     slug: string;
 }
 
 export class ArticlePreview extends React.Component<IProps, {}> {
     constructor(props: IProps) {
-        super(props)
+        super(props);
+        this.handleError = this.handleError.bind(this);
+    }
+    handleError(error: any) {
+        if (error.response.statusCode === 401) {
+            this.setState(error.response.body)
+        } else {
+            console.log(error.response.text);
+        }
+    }
+    favorite(slug: string) {
+        request.post(`https://conduit.productionready.io/api/articles/${slug}/favorite`)
+            .catch(err => this.handleError(err));
+    }
+    unfavorite(slug: string) {
+        request.delete(`https://conduit.productionready.io/api/articles/${slug}/favorite`)
+            .catch(err => this.handleError(err));
     }
     render() {
+        const action = this.props.favorited ? this.unfavorite : this.favorite;
         return <div className="article-preview">
             <div className="article-meta">
                 <Link to={`/profile/${this.props.name}`}><img src={this.props.img} /></Link>
@@ -24,8 +43,8 @@ export class ArticlePreview extends React.Component<IProps, {}> {
                     <Link to={`/profile/${this.props.name}`} className="author">{this.props.name}</Link>
                     <span className="date">{getDate(this.props.date)}</span>
                 </div>
-                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                    <i className="ion-heart"></i> {this.props.hearts}
+                <button className="btn btn-outline-primary btn-sm pull-xs-right" onClick={e => action(this.props.slug)}>
+                    <i className="ion-heart"></i> {this.props.favoriteCount}
                 </button>
             </div>
             <Link to={`/article/${this.props.slug}`} className="preview-link">

@@ -25,6 +25,10 @@ interface IState {
 
 class Profile extends React.Component<IProps, IState> {
     readonly state: IState = { isFetchingData: true, showFavorited: this.showFavorited(this.props), articlesCount: 0 } as IState;
+    constructor(props: IProps) {
+        super(props);
+        this.handleError = this.handleError.bind(this);
+    }
     componentDidMount() {
 
         request.get(`https://conduit.productionready.io/api/profiles/${this.props.match.params.username}`)
@@ -50,17 +54,33 @@ class Profile extends React.Component<IProps, IState> {
                 .query({ favorited: params.username, limit: 5, offset: 0 })
                 .then(resp => this.setState(resp.body))
                 .then(() => this.setState({ isFetchingData: false }))
+                .catch(err => this.handleError(err));
 
         } else {
             request.get("https://conduit.productionready.io/api/articles")
                 .query({ author: params.username, limit: 5, offset: 0 })
                 .then(resp => this.setState(resp.body))
                 .then(() => this.setState({ isFetchingData: false }))
+                .catch(err => this.handleError(err));
         }
 
         this.setState({ isFetchingData: true });
     }
-
+    handleError(error: any) {
+        if (error.response.statusCode === 401) {
+            this.setState(error.response.body)
+        } else {
+            console.log(error.response.text);
+        }
+    }
+    follow(userName: string) {
+        request.post(`https://conduit.productionready.io/api/profiles/${userName}/follow`)
+            .catch(err => this.handleError(err));
+    }
+    unfollow(userName: string) {
+        request.delete(`https://conduit.productionready.io/api/profiles/${userName}/follow`)
+            .catch(err => this.handleError(err));
+    }
     componentDidUpdate(oldProps: IProps, oldState: IState) {
         if (this.state.isFetchingData || oldState.isFetchingData || !this.urlChanged(oldProps)) {
             return;
@@ -82,11 +102,19 @@ class Profile extends React.Component<IProps, IState> {
                             <img src={!!profile && profile.image} className="user-img" />
                             <h4>{!!profile && profile.username}</h4>
                             {!!profile && profile.bio}
-                            <button className="btn btn-sm btn-outline-secondary action-btn">
-                                <i className="ion-plus-round"></i>
-                                &nbsp;
-                                Follow {!!profile && profile.username}
-                            </button>
+                            {!!profile && (profile.following
+                                ? <button className="btn btn-sm btn-outline-secondary action-btn"
+                                    onClick={e => this.unfollow(profile.username)}>
+                                    <i className="ion-plus-round"></i>
+                                    &nbsp;
+                                Unfollow {profile.username}
+                                </button>
+                                : <button className="btn btn-sm btn-outline-secondary action-btn"
+                                    onClick={e => this.follow(profile.username)}>
+                                    <i className="ion-plus-round"></i>
+                                    &nbsp;
+                                Follow {profile.username}
+                                </button>)}
                         </div>
                     </div>
                 </div>
@@ -112,7 +140,8 @@ class Profile extends React.Component<IProps, IState> {
                             date={article.createdAt}
                             articleName={article.title}
                             description={article.description}
-                            hearts={article.favoritesCount}
+                            favoriteCount={article.favoritesCount}
+                            favorited={article.favorited}
                             slug={article.slug}
                         />)}
 

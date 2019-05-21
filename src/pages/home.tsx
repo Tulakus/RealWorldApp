@@ -3,7 +3,6 @@ import { ArticlePreview } from '../components/article-preview';
 import { TagsList } from '../components/tag-list';
 import { Pagination } from '../components/pagination';
 import { Sidebar } from '../components/sidebar';
-
 import { RouteComponentProps, Link } from 'react-router-dom';
 import * as request from 'superagent';
 import { IArticle } from '../interfaces/IArticle';
@@ -99,9 +98,10 @@ export class Home extends React.Component<IProps, IState> {
                                     name={i.author.username}
                                     date={getDate(i.createdAt)}
                                     articleName={i.title}
-                                    hearts={i.favoritesCount}
+                                    favoriteCount={i.favoritesCount}
                                     description={i.description}
                                     slug={i.slug}
+                                    favorited={i.favorited}
                                 />)}
                     </div>
                     <div className="col-md-3">

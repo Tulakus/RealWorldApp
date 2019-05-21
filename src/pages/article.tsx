@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Card } from '../components/card';
-import { ArticleBanner } from '../components/article-banner';
+import { Banner } from '../components/banner';
 import { ArticleMeta } from '../components/article-meta';
 import * as request from 'superagent';
 import { RouteComponentProps } from 'react-router'
@@ -30,14 +30,20 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
     render() {
         const article = this.state.article;
         return <div className="article-page">
-            {!!article && <ArticleBanner
-                img={article.author.image}
-                title={article.title}
-                name={article.author.username}
-                date={getDate(article.createdAt)}
-                followers={article.favorited}
-                hearts={article.favoritesCount}
-            />}
+            {!!article && <Banner
+                title={article.title}>
+                <ArticleMeta
+                    img={article.author.image}
+                    userName={article.author.username}
+                    date={getDate(article.createdAt)}
+                    following={article.favorited}
+
+                    favorited={article.favorited}
+                    favoriteCount={article.favoritesCount}
+                    slug={article.slug}
+                />
+            </Banner>
+            }
 
             <div className="container page">
 
@@ -52,10 +58,13 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
                 <div className="article-actions">
                     {!!article && <ArticleMeta
                         img={article.author.image}
-                        name={article.author.username}
+                        userName={article.author.username}
                         date={getDate(article.createdAt)}
-                        followers={article.favorited}
-                        hearts={article.favoritesCount}
+                        following={article.favorited}
+
+                        favoriteCount={article.favoritesCount}
+                        favorited={article.favorited}
+                        slug={article.slug}
                     />}
                 </div>
 

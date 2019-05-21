@@ -1,7 +1,43 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import * as request from 'superagent';
+import { IUser } from '../interfaces/IUser';
+import { ErrorList } from '../components/error-list';
+import { IError } from '../interfaces/IError';
 
-export class Login extends React.Component {
+interface IState {
+    password?: string;
+    email?: string;
+    user?: IUser;
+    errors?: IError
+}
+interface IProps {
+
+}
+export class Login extends React.Component<IProps, IState>{
+    readonly state = {} as IState;
+    constructor(props: IProps) {
+        super(props);
+        this.login = this.login.bind(this);
+        this.handleError = this.handleError.bind(this);
+    }
+    handleChange(e: any, id: string) {
+        this.setState({ [id]: e.target.value });
+    }
+    login(e: any) {
+        e.preventDefault();
+        request.post('https://conduit.productionready.io/api/users/login')
+            .send({ password: this.state.password, email: this.state.email })
+            .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
+            .catch(err => this.handleError(err));
+    }
+    handleError(error: any) {
+        if (error.response.statusCode === 422) {
+            this.setState(error.response.body)
+        } else {
+            console.log(error.response.text);
+        }
+    }
     render() {
         return <div className="auth-page">
             <div className="container page">
@@ -13,18 +49,16 @@ export class Login extends React.Component {
                             <Link to={"/register"}>Need an account?</Link>
                         </p>
 
-                        <ul className="error-messages">
-                            <li>email or password is invalid</li>
-                        </ul>
+                        <ErrorList errors={this.state.errors} />
 
-                        <form>
+                        <form onSubmit={this.login}>
                             <fieldset className="form-group">
-                                <input className="form-control form-control-lg" type="text" placeholder="Email" />
+                                <input className="form-control form-control-lg" type="text" onChange={e => this.handleChange(e, "email")} placeholder="Email" />
                             </fieldset>
                             <fieldset className="form-group">
-                                <input className="form-control form-control-lg" type="password" placeholder="Password" />
+                                <input className="form-control form-control-lg" type="password" onChange={e => this.handleChange(e, "password")} placeholder="Password" />
                             </fieldset>
-                            <button className="btn btn-lg btn-primary pull-xs-right">
+                            <button className="btn btn-lg btn-primary pull-xs-right" type="submit">
                                 Sign up
                             </button>
                         </form>
