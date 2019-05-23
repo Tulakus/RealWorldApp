@@ -1,85 +1,93 @@
-import * as React from 'react';
-import { Card } from '../components/card';
-import { Banner } from '../components/banner';
-import { ArticleMeta } from '../components/article-meta';
-import * as request from 'superagent';
-import { RouteComponentProps } from 'react-router'
-import { IComment } from '../interfaces/IComment';
-import { IArticle } from '../interfaces/IArticle';
-import { getDate } from '../helpers/helper';
+import * as React from "react";
+import { RouteComponentProps } from "react-router";
+import * as request from "superagent";
+import { ArticleMeta } from "../components/article-meta";
+import { Banner } from "../components/banner";
+import { Card } from "../components/card";
+import { getDate } from "../helpers/helper";
+import { IArticle } from "../interfaces/IArticle";
+import { IComment } from "../interfaces/IComment";
 
 interface IProps {
-    slug: string
+  slug: string;
 }
 
 interface IState {
-    article: IArticle;
-    comments: IComment[];
+  article: IArticle;
+  comments: IComment[];
 }
 export class Article extends React.Component<RouteComponentProps<IProps>> {
-    readonly state: IState = {} as IState;
+  public readonly state: IState = {} as IState;
 
-    componentDidMount() {
+  public componentDidMount() {
+    const articleRequest = request.get(
+      `https://conduit.productionready.io/api/articles/${
+        this.props.match.params.slug
+      }`
+    );
+    const articleCommentsRequest = request.get(
+      `https://conduit.productionready.io/api/articles/${
+        this.props.match.params.slug
+      }/comments`
+    );
 
-        const articleRequest = request.get(`https://conduit.productionready.io/api/articles/${this.props.match.params.slug}`);
-        const articleCommentsRequest = request.get(`https://conduit.productionready.io/api/articles/${this.props.match.params.slug}/comments`);
+    Promise.all([articleRequest, articleCommentsRequest]).then(value =>
+      value.forEach(i => this.setState(i.body))
+    );
+  }
+  public render() {
+    const article = this.state.article;
+    return (
+      <div className="article-page">
+        {!!article && (
+          <Banner title={article.title}>
+            <ArticleMeta
+              img={article.author.image}
+              userName={article.author.username}
+              date={getDate(article.createdAt)}
+              following={article.favorited}
+              favorited={article.favorited}
+              favoriteCount={article.favoritesCount}
+              slug={article.slug}
+            />
+          </Banner>
+        )}
 
-        Promise.all([articleRequest, articleCommentsRequest]).then(value => value.forEach(i => this.setState(i.body)))
+        <div className="container page">
+          <div className="row article-content">
+            <div className="col-md-12">{!!article && article.body}</div>
+          </div>
 
-    }
-    render() {
-        const article = this.state.article;
-        return <div className="article-page">
-            {!!article && <Banner
-                title={article.title}>
-                <ArticleMeta
-                    img={article.author.image}
-                    userName={article.author.username}
-                    date={getDate(article.createdAt)}
-                    following={article.favorited}
+          <hr />
 
-                    favorited={article.favorited}
-                    favoriteCount={article.favoritesCount}
-                    slug={article.slug}
-                />
-            </Banner>
-            }
+          <div className="article-actions">
+            {!!article && (
+              <ArticleMeta
+                img={article.author.image}
+                userName={article.author.username}
+                date={getDate(article.createdAt)}
+                following={article.favorited}
+                favoriteCount={article.favoritesCount}
+                favorited={article.favorited}
+                slug={article.slug}
+              />
+            )}
+          </div>
 
-            <div className="container page">
+          <div className="row">
+            <div className="col-xs-12 col-md-8 offset-md-2">
+              <div>Sign in or sign up to add comments on this article.</div>
+              {!!this.state.comments &&
+                this.state.comments.map(comment => (
+                  <Card
+                    img={comment.author.image}
+                    comment={comment.body}
+                    name={comment.author.username}
+                    date={getDate(comment.createdAt)}
+                  />
+                ))}
 
-                <div className="row article-content">
-                    <div className="col-md-12">
-                        {!!article && article.body}
-                    </div>
-                </div>
-
-                <hr />
-
-                <div className="article-actions">
-                    {!!article && <ArticleMeta
-                        img={article.author.image}
-                        userName={article.author.username}
-                        date={getDate(article.createdAt)}
-                        following={article.favorited}
-
-                        favoriteCount={article.favoritesCount}
-                        favorited={article.favorited}
-                        slug={article.slug}
-                    />}
-                </div>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-8 offset-md-2">
-                        <div>Sign in or sign up to add comments on this article.</div>
-                        {!!this.state.comments && this.state.comments.map(comment => <Card
-                            img={comment.author.image}
-                            comment={comment.body}
-                            name={comment.author.username}
-                            date={getDate(comment.createdAt)}
-                        />)}
-
-                        {/*TODO : add this
+              {/*TODO : add this
                         <Card
                             isEditing={true}
                             img={"http://i.imgur.com/Qr71crq.jpg"}
@@ -91,13 +99,10 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
                             date={"Dec 29th"}
                             isAuthor={true}
                         />*/}
-
-                    </div>
-
-                </div>
-
             </div>
-
+          </div>
         </div>
-    }
+      </div>
+    );
+  }
 }
