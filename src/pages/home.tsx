@@ -8,17 +8,6 @@ import { TagsList } from "../components/tag-list";
 import { getDate } from "../helpers/helper";
 import { IArticle } from "../interfaces/IArticle";
 
-const tags = [
-  "programming",
-  "javascript",
-  "emberjs",
-  "angularjs",
-  "react",
-  "mean",
-  "node",
-  "rails"
-];
-
 interface IMatchParams {
   tag: string;
 }

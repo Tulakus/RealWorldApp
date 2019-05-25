@@ -26,7 +26,9 @@ export class Login extends React.Component<{}, IState> {
     e.preventDefault();
     request
       .post("https://conduit.productionready.io/api/users/login")
-      .send({ password: this.state.password, email: this.state.email })
+      .send({
+        user: { password: this.state.password, email: this.state.email }
+      })
       .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
       .catch(err => this.handleError(err));
   }
@@ -69,7 +71,7 @@ export class Login extends React.Component<{}, IState> {
                   className="btn btn-lg btn-primary pull-xs-right"
                   type="submit"
                 >
-                  Sign up
+                  Sign in
                 </button>
               </form>
             </div>

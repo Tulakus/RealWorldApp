@@ -33,9 +33,11 @@ export class Register extends React.Component<{}, IState> {
     request
       .post("https://conduit.productionready.io/api/users")
       .send({
-        email: this.state.email,
-        name: this.state.userName,
-        password: this.state.password
+        user: {
+          email: this.state.email,
+          password: this.state.password,
+          username: this.state.userName
+        }
       })
       .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
       .catch(err => this.handleError(err));
