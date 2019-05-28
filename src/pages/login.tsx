@@ -1,41 +1,25 @@
 import * as React from "react";
+import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import * as request from "superagent";
 import { ErrorList } from "../components/error-list";
-import { IError } from "../interfaces/IError";
-import { IUser } from "../interfaces/IUser";
+import {
+  ILoginProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "./../reducers/login";
 
-interface IState {
-  password?: string;
-  email?: string;
-  user?: IUser;
-  errors?: IError;
-}
-
-export class Login extends React.Component<{}, IState> {
-  public readonly state = {} as IState;
-  constructor(props: Readonly<{}>) {
+class Login extends React.Component<ILoginProps, {}> {
+  constructor(props: ILoginProps) {
     super(props);
     this.login = this.login.bind(this);
-    this.handleError = this.handleError.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
-  public handleChange(e: any, id: string) {
-    this.setState({ [id]: e.target.value });
+  public handleChange(e: any, key: string) {
+    this.props.changeValue(key, e.target.value);
   }
   public login(e: any) {
     e.preventDefault();
-    request
-      .post("https://conduit.productionready.io/api/users/login")
-      .send({
-        user: { password: this.state.password, email: this.state.email }
-      })
-      .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
-      .catch(err => this.handleError(err));
-  }
-  public handleError(error: any) {
-    if (error.response.statusCode === 422) {
-      this.setState(error.response.body);
-    }
+    this.props.login(this.props.email, this.props.password);
   }
   public render() {
     return (
@@ -47,9 +31,8 @@ export class Login extends React.Component<{}, IState> {
               <p className="text-xs-center">
                 <Link to={"/register"}>Need an account?</Link>
               </p>
-
-              <ErrorList errors={this.state.errors} />
-
+              <ErrorList errors={this.props.errors} />
+              <p>tady jsou props - {this.props.email}</p>
               <form onSubmit={this.login}>
                 <fieldset className="form-group">
                   <input
@@ -81,3 +64,8 @@ export class Login extends React.Component<{}, IState> {
     );
   }
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Login);

@@ -1,9 +1,14 @@
 import * as React from "react";
+import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import * as request from "superagent";
 import { ErrorList } from "../components/error-list";
 import { IError } from "../interfaces/IError";
 import { IUser } from "../interfaces/IUser";
+import {
+  IRegistrationProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../reducers/register";
 
 interface IState {
   password?: string;
@@ -13,34 +18,22 @@ interface IState {
   errors?: IError;
 }
 
-export class Register extends React.Component<{}, IState> {
+class Register extends React.Component<IRegistrationProps, {}> {
   public readonly state = {} as IState;
-  constructor(props: Readonly<{}>) {
+  constructor(props: IRegistrationProps) {
     super(props);
-    this.register = this.register.bind(this);
-    this.handleError = this.handleError.bind(this);
+    this.registration = this.registration.bind(this);
   }
-  public handleChange(e: any, id: string) {
-    this.setState({ [id]: e.target.value });
+  public handleChange(e: any, key: string) {
+    this.props.changeValue(key, e.target.value);
   }
-  public handleError(error: any) {
-    if (error.response.statusCode === 422) {
-      this.setState(error.response.body);
-    }
-  }
-  public register(e: any) {
+  public registration(e: any) {
     e.preventDefault();
-    request
-      .post("https://conduit.productionready.io/api/users")
-      .send({
-        user: {
-          email: this.state.email,
-          password: this.state.password,
-          username: this.state.userName
-        }
-      })
-      .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
-      .catch(err => this.handleError(err));
+    this.props.registration(
+      this.props.username,
+      this.props.password,
+      this.props.email
+    );
   }
   public render() {
     return (
@@ -53,15 +46,15 @@ export class Register extends React.Component<{}, IState> {
                 <Link to={"/login"}>Have an account?</Link>
               </p>
 
-              <ErrorList errors={this.state.errors} />
+              <ErrorList errors={this.props.errors} />
 
-              <form onSubmit={this.register}>
+              <form onSubmit={this.registration}>
                 <fieldset className="form-group">
                   <input
                     className="form-control form-control-lg"
                     type="text"
                     placeholder="Your Name"
-                    onChange={e => this.handleChange(e, "userName")}
+                    onChange={e => this.handleChange(e, "username")}
                   />
                 </fieldset>
                 <fieldset className="form-group">
@@ -91,3 +84,8 @@ export class Register extends React.Component<{}, IState> {
     );
   }
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Register);
