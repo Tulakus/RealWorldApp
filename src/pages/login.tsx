@@ -19,7 +19,9 @@ class Login extends React.Component<ILoginProps, {}> {
   }
   public login(e: any) {
     e.preventDefault();
-    this.props.login(this.props.email, this.props.password);
+    this.props.login({
+      user: { email: this.props.email, password: this.props.password }
+    });
   }
   public render() {
     return (

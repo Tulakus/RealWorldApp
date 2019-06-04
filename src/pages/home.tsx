@@ -1,74 +1,37 @@
 import * as React from "react";
-import { Link, RouteComponentProps } from "react-router-dom";
-import * as request from "superagent";
+import { connect } from "react-redux";
 import { ArticlePreview } from "../components/article-preview";
 import { Pagination } from "../components/pagination";
 import { Sidebar } from "../components/sidebar";
 import { TagsList } from "../components/tag-list";
 import { getDate } from "../helpers/helper";
-import { IArticle } from "../interfaces/IArticle";
+import {
+  IHomeProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "./../reducers/home";
 
-interface IMatchParams {
-  tag: string;
-}
-
-interface IProps extends RouteComponentProps<IMatchParams> {}
-
-interface IState {
-  articles: IArticle[];
-  tags: string[];
-  articlesCount: number;
-  tag: string;
-  isFetchingData: boolean;
-}
-
-export class Home extends React.Component<IProps, IState> {
-  public readonly state: IState = {
-    articles: [],
-    articlesCount: 0,
-    isFetchingData: true,
-    tag: "",
-    tags: []
+class Home extends React.Component<IHomeProps, {}> {
+  public readonly state = {
+    tag: ""
   };
   public componentDidMount() {
-    const allArticlesRequest = request
-      .get("https://conduit.productionready.io/api/articles")
-      .query({
-        limit: 10,
-        offset: 0
-      });
-    const tagsRequest = request.get(
-      "https://conduit.productionready.io/api/tags"
-    );
-
-    Promise.all([allArticlesRequest, tagsRequest])
-      .then(value => value.forEach(i => this.setState(i.body)))
-      .then(() => this.setState({ isFetchingData: false }));
-  }
-  public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    if (prevState.tag === this.state.tag) {
-      return;
-    }
-    request
-      .get("https://conduit.productionready.io/api/articles")
-      .query({
-        limit: 10,
-        offset: 0,
-        tag: this.state.tag
-      })
-      .then(resp => this.setState(resp.body))
-      .then(() =>
-        this.setState({ tag: this.state.tag, isFetchingData: false })
-      );
+    this.props.getArticles();
+    this.props.getTags();
   }
   public handle(e: React.MouseEvent<HTMLElement>) {
-    alert(e.target);
-    this.setState({ tag: "", isFetchingData: true });
+    // todo dodelat
   }
-  public handle2 = (e: string) =>
-    this.setState({ tag: e, isFetchingData: true });
+  public handleTagClick = (tag: string) => {
+    this.setState({
+      tag
+    });
+    this.props.getArticlesWithTag(tag);
+  };
+
   public render() {
-    const isActive = this.state.tag !== "";
+    const tag: string = this.state.tag;
+    const isActive = tag !== "";
     return (
       <div className="home-page">
         <div className="banner">
@@ -91,24 +54,21 @@ export class Home extends React.Component<IProps, IState> {
                       Global Feed
                     </a>
                   </li>
-                  {this.state.tag !== "" && (
+                  {!!tag && tag !== "" && (
                     <li className="nav-item">
                       <a
                         className={isActive ? "nav-link active" : "nav-link"}
                         href="/"
                         onClick={e => e.preventDefault()}
                       >
-                        {"#" + this.state.tag}
+                        {"#" + tag}
                       </a>
                     </li>
                   )}
                 </ul>
               </div>
-              {this.state.isFetchingData === true ? (
-                <div>Loading content...</div>
-              ) : (
-                this.state.articles.length > 0 &&
-                this.state.articles.map(i => (
+              {this.props.articles.length > 0 &&
+                this.props.articles.map(i => (
                   <ArticlePreview
                     img={i.author.image}
                     name={i.author.username}
@@ -119,24 +79,29 @@ export class Home extends React.Component<IProps, IState> {
                     slug={i.slug}
                     favorited={i.favorited}
                   />
-                ))
-              )}
+                ))}
             </div>
             <div className="col-md-3">
               {
                 <Sidebar title={"Popular Tags"}>
-                  {this.state.isFetchingData === true ? (
-                    <div>Loading content...</div>
-                  ) : (
-                    <TagsList tags={this.state.tags} onClick={this.handle2} />
-                  )}
+                  {
+                    <TagsList
+                      tags={this.props.tags}
+                      onClick={this.handleTagClick}
+                    />
+                  }
                 </Sidebar>
               }
             </div>
           </div>
         </div>
-        <Pagination pages={Math.floor(this.state.articlesCount / 10)} />
+        <Pagination pages={Math.floor(this.props.articlesCount / 10)} />
       </div>
     );
   }
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

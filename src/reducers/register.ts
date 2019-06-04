@@ -1,12 +1,15 @@
 import { ThunkDispatch } from "redux-thunk";
-import * as request from "superagent";
+import { IRegistrationRequest, registerUser } from "../helpers/apiHelper";
 import { IError } from "../interfaces/IError";
 import { IUser } from "../interfaces/IUser";
 import { AppState } from "../store/rootStore";
+import {
+  CHANGE_VALUE,
+  changeValue,
+  IChangeValueAction
+} from "./actions/changeValueAction";
 
-const CHANGE_VALUE = "CHANGE_VALUE";
-const REGISTRATION_ERROR = "REGISTRATION_ERROR";
-const REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS";
+export const REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS";
 
 interface IRegistrationState {
   password: string;
@@ -16,35 +19,9 @@ interface IRegistrationState {
   errors?: IError;
 }
 
-interface IChangeValueAction {
-  type: typeof CHANGE_VALUE;
-  value: string;
-  key: string;
-}
-
-interface IHasErrorAction {
-  type: typeof REGISTRATION_ERROR;
-  error: any;
-}
-
 interface IFetchedDataAction {
   type: typeof REGISTRATION_SUCCESS;
   user: IUser;
-}
-
-export function changeValue(key: string, value: string): IChangeValueAction {
-  return {
-    key,
-    type: CHANGE_VALUE,
-    value
-  };
-}
-
-export function registrationHasError(error: any): IHasErrorAction {
-  return {
-    error,
-    type: REGISTRATION_ERROR
-  };
 }
 
 export function registrationSuccess(user: IUser): IFetchedDataAction {
@@ -56,7 +33,7 @@ export function registrationSuccess(user: IUser): IFetchedDataAction {
 
 export interface IMapDispatchToProps {
   changeValue: (key: string, value: string) => void;
-  registration: (username: string, password: string, email: string) => void;
+  registration: (data: IRegistrationRequest) => void;
 }
 
 export interface IMapStateToProps {
@@ -66,15 +43,12 @@ export interface IMapStateToProps {
   errors?: IError;
 }
 
-export type RegistrationActionTypes =
-  | IChangeValueAction
-  | IHasErrorAction
-  | IFetchedDataAction;
+export type RegistrationActionTypes = IChangeValueAction | IFetchedDataAction;
 
 const initialState: IRegistrationState = {
-  email: "",
-  password: "",
-  username: ""
+  email: "tulakuss@realworld.com",
+  password: "Password*",
+  username: "tulakuss"
 };
 
 export function registrationReducer(
@@ -85,10 +59,6 @@ export function registrationReducer(
     case CHANGE_VALUE:
       return Object.assign({}, state, {
         [action.key]: action.value
-      });
-    case REGISTRATION_ERROR:
-      return Object.assign({}, state, {
-        errors: action.error.errors
       });
     case REGISTRATION_SUCCESS:
       return Object.assign({}, state, {
@@ -104,15 +74,7 @@ export const mapDispatchToProps = (
 ): IMapDispatchToProps => {
   return {
     changeValue: (key, e) => dispatch(changeValue(key, e)),
-    registration: (username: string, password: string, email: string) => {
-      request
-        .post("https://conduit.productionready.io/api/users")
-        .send({
-          user: { email, username, password }
-        })
-        .then(resp => dispatch(registrationSuccess(resp.body)))
-        .catch(err => dispatch(registrationHasError(err.response.body)));
-    }
+    registration: (data: IRegistrationRequest) => dispatch(registerUser(data))
   };
 };
 

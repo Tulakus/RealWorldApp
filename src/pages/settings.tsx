@@ -1,47 +1,50 @@
 import * as React from "react";
-import * as request from "superagent";
-import { IError } from "../interfaces/IError";
-import { IUser } from "../interfaces/IUser";
+import { connect } from "react-redux";
+import {
+  ISettingsnProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../reducers/settings";
 
 interface IState {
   password?: string;
   email?: string;
   userName?: string;
-  user?: IUser;
   userBio?: string;
   userImage?: string;
-  errors?: IError;
 }
 
-export class Settings extends React.Component<{}, IState> {
-  public readonly state = {} as IState;
-  constructor(props: Readonly<{}>) {
+class Settings extends React.Component<ISettingsnProps, IState> {
+  public readonly state = {
+    email: this.props.email,
+    password: this.props.password,
+    userBio: this.props.userBio,
+    userImage: this.props.userImage,
+    userName: this.props.userName
+  } as IState;
+
+  constructor(props: ISettingsnProps) {
     super(props);
     this.updateSettings = this.updateSettings.bind(this);
-    this.handleError = this.handleError.bind(this);
   }
+
   public handleChange(e: any, id: string) {
     this.setState({ [id]: e.target.value });
   }
-  public handleError(error: any) {
-    if (error.response.statusCode === 401) {
-      this.setState(error.response.body);
-    }
-  }
+
   public updateSettings(e: any) {
     e.preventDefault();
-    request
-      .put("https://conduit.productionready.io/api/user")
-      .send({
+    this.props.updateSettings({
+      user: {
         bio: this.state.userBio,
         email: this.state.email,
         image: this.state.userImage,
         name: this.state.userName,
         password: this.state.password
-      })
-      .then(resp => this.setState({ errors: undefined, user: resp.body.user }))
-      .catch(err => this.handleError(err));
+      }
+    });
   }
+
   public render() {
     return (
       <div className="settings-page">
@@ -57,7 +60,8 @@ export class Settings extends React.Component<{}, IState> {
                       className="form-control"
                       type="text"
                       placeholder="URL of profile picture"
-                      onChange={e => this.handleChange(e, "usarImage")}
+                      onChange={e => this.handleChange(e, "userImage")}
+                      value={this.state.userImage}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -66,6 +70,7 @@ export class Settings extends React.Component<{}, IState> {
                       type="text"
                       placeholder="Your Name"
                       onChange={e => this.handleChange(e, "userName")}
+                      value={this.state.userName}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -74,6 +79,7 @@ export class Settings extends React.Component<{}, IState> {
                       rows={8}
                       placeholder="Short bio about you"
                       onChange={e => this.handleChange(e, "userBio")}
+                      value={this.state.userBio}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -82,6 +88,7 @@ export class Settings extends React.Component<{}, IState> {
                       type="text"
                       placeholder="Email"
                       onChange={e => this.handleChange(e, "email")}
+                      value={this.state.email}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -104,3 +111,8 @@ export class Settings extends React.Component<{}, IState> {
     );
   }
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Settings);

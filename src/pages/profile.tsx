@@ -1,10 +1,13 @@
 import * as React from "react";
-import { Link, match, RouteComponentProps } from "react-router-dom";
-import * as request from "superagent";
+import { connect } from "react-redux";
+import { Link, RouteComponentProps } from "react-router-dom";
 import { ArticlePreview } from "../components/article-preview";
 import { Pagination } from "../components/pagination";
-import { IArticle } from "../interfaces/IArticle";
-import { IProfile } from "../interfaces/IProfile";
+import {
+  IProfileProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../reducers/profile";
 
 interface IMatchParams {
   username: string;
@@ -14,64 +17,32 @@ interface IMatchParams {
 interface IProps extends RouteComponentProps<IMatchParams> {}
 
 interface IState {
-  articles: IArticle[];
-  articlesCount: number;
   showFavorited: boolean;
-  isFetchingData: boolean;
-  profile: IProfile;
 }
 
-class Profile extends React.Component<IProps, IState> {
-  public readonly state: IState = {
-    articlesCount: 0,
-    isFetchingData: true,
-    showFavorited: this.showFavorited(this.props)
-  } as IState;
-  constructor(props: IProps) {
+class Profile extends React.Component<IProps & IProfileProps, IState> {
+  public readonly state = {
+    showFavorited: false
+  };
+  constructor(props: IProps & IProfileProps) {
     super(props);
     this.handleError = this.handleError.bind(this);
+    this.fetchData = this.fetchData.bind(this);
   }
   public componentDidMount() {
-    request
-      .get(
-        `https://conduit.productionready.io/api/profiles/${
-          this.props.match.params.username
-        }`
-      )
-      .then(resp => this.setState(resp.body));
-
-    this.fetchData();
+    this.fetchData({
+      author: this.props.match.params.username,
+      limit: 5,
+      offset: 0
+    });
   }
 
   public showFavorited(props: IProps): boolean {
     const params: IMatchParams = props.match.params;
     return !!params.favorited && params.favorited === "favorited";
   }
-
-  public urlChanged(oldProps: IProps): boolean {
-    return oldProps.match.url !== this.props.match.url;
-  }
-
-  public fetchData(): void {
-    const params: IMatchParams = this.props.match.params;
-
-    if (this.showFavorited(this.props)) {
-      request
-        .get("https://conduit.productionready.io/api/articles")
-        .query({ favorited: params.username, limit: 5, offset: 0 })
-        .then(resp => this.setState(resp.body))
-        .then(() => this.setState({ isFetchingData: false }))
-        .catch(err => this.handleError(err));
-    } else {
-      request
-        .get("https://conduit.productionready.io/api/articles")
-        .query({ author: params.username, limit: 5, offset: 0 })
-        .then(resp => this.setState(resp.body))
-        .then(() => this.setState({ isFetchingData: false }))
-        .catch(err => this.handleError(err));
-    }
-
-    this.setState({ isFetchingData: true });
+  public fetchData(data: any): void {
+    this.props.fetchArticles(data);
   }
   public handleError(error: any) {
     if (error.response.statusCode === 401) {
@@ -79,35 +50,15 @@ class Profile extends React.Component<IProps, IState> {
     }
   }
   public follow(userName: string) {
-    request
-      .post(
-        `https://conduit.productionready.io/api/profiles/${userName}/follow`
-      )
-      .catch(err => this.handleError(err));
+    this.props.follow(userName);
   }
   public unfollow(userName: string) {
-    request
-      .delete(
-        `https://conduit.productionready.io/api/profiles/${userName}/follow`
-      )
-      .catch(err => this.handleError(err));
+    this.props.unfollow(userName);
   }
-  public componentDidUpdate(oldProps: IProps, oldState: IState) {
-    if (
-      this.state.isFetchingData ||
-      oldState.isFetchingData ||
-      !this.urlChanged(oldProps)
-    ) {
-      return;
-    }
-
-    this.setState({ showFavorited: !oldState.showFavorited });
-    this.fetchData();
-  }
-
   public render() {
-    const articles = this.state.articles;
-    const profile = this.state.profile;
+    const articles = this.props.articles;
+    const profile = this.props.profile;
+    const username = this.props.match.params.username;
     return (
       <div className="profile-page">
         <div className="user-info">
@@ -147,7 +98,7 @@ class Profile extends React.Component<IProps, IState> {
                 <ul className="nav nav-pills outline-active">
                   <li className="nav-item">
                     <Link
-                      to={`/profile/${this.props.match.params.username}`}
+                      to={`/profile/${username}`}
                       className={
                         this.state.showFavorited
                           ? "nav-link"
@@ -160,15 +111,20 @@ class Profile extends React.Component<IProps, IState> {
                   </li>
                   <li className="nav-item">
                     <Link
-                      to={`/profile/${
-                        this.props.match.params.username
-                      }/favorited`}
+                      to={`/profile/${username}/favorited`}
                       className={
                         this.state.showFavorited
                           ? "nav-link active"
                           : "nav-link"
                       }
                       href=""
+                      onClick={e =>
+                        this.fetchData({
+                          favorited: username,
+                          limit: 5,
+                          offset: 0
+                        })
+                      }
                     >
                       Favorited Articles
                     </Link>
@@ -190,7 +146,7 @@ class Profile extends React.Component<IProps, IState> {
                   />
                 ))}
 
-              <Pagination pages={this.state.articlesCount} />
+              <Pagination pages={this.props.articlesCount} />
             </div>
           </div>
         </div>
@@ -199,4 +155,7 @@ class Profile extends React.Component<IProps, IState> {
   }
 }
 
-export { Profile };
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Profile);

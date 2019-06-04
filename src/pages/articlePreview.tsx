@@ -1,49 +1,36 @@
 import * as React from "react";
+import { connect } from "react-redux";
 import { RouteComponentProps } from "react-router";
-import * as request from "superagent";
 import { ArticleMeta } from "../components/article-meta";
 import { Banner } from "../components/banner";
 import { Card } from "../components/card";
 import { getDate } from "../helpers/helper";
-import { IArticle } from "../interfaces/IArticle";
-import { IComment } from "../interfaces/IComment";
+import {
+  IArticleProps,
+  mapDispatchToProps,
+  mapStateToProps
+} from "../reducers/article";
 
-interface IProps {
+interface IMatchParams {
   slug: string;
 }
 
-interface IState {
-  article: IArticle;
-  comments: IComment[];
-}
-export class Article extends React.Component<RouteComponentProps<IProps>> {
-  public readonly state: IState = {} as IState;
+interface IProps extends RouteComponentProps<IMatchParams> {}
 
+class ArticlePreview extends React.Component<IProps & IArticleProps> {
   public componentDidMount() {
-    const articleRequest = request.get(
-      `https://conduit.productionready.io/api/articles/${
-        this.props.match.params.slug
-      }`
-    );
-    const articleCommentsRequest = request.get(
-      `https://conduit.productionready.io/api/articles/${
-        this.props.match.params.slug
-      }/comments`
-    );
-
-    Promise.all([articleRequest, articleCommentsRequest]).then(value =>
-      value.forEach(i => this.setState(i.body))
-    );
+    this.props.fetchArticle({ slug: this.props.match.params.slug });
+    this.props.fetchArticleComments({ slug: this.props.match.params.slug });
   }
   public render() {
-    const article = this.state.article;
+    const article = this.props.article;
     return (
       <div className="article-page">
         {!!article && (
           <Banner title={article.title}>
             <ArticleMeta
-              img={article.author.image}
-              userName={article.author.username}
+              img={!!article.author && article.author.image}
+              userName={!!article.author && article.author.username}
               date={getDate(article.createdAt)}
               following={article.favorited}
               favorited={article.favorited}
@@ -63,8 +50,8 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
           <div className="article-actions">
             {!!article && (
               <ArticleMeta
-                img={article.author.image}
-                userName={article.author.username}
+                img={!!article.author && article.author.image}
+                userName={!!article.author && article.author.username}
                 date={getDate(article.createdAt)}
                 following={article.favorited}
                 favoriteCount={article.favoritesCount}
@@ -77,8 +64,8 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
           <div className="row">
             <div className="col-xs-12 col-md-8 offset-md-2">
               <div>Sign in or sign up to add comments on this article.</div>
-              {!!this.state.comments &&
-                this.state.comments.map(comment => (
+              {!!this.props.articleComments &&
+                this.props.articleComments.map(comment => (
                   <Card
                     img={comment.author.image}
                     comment={comment.body}
@@ -106,3 +93,8 @@ export class Article extends React.Component<RouteComponentProps<IProps>> {
     );
   }
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ArticlePreview);

@@ -29,11 +29,13 @@ class Register extends React.Component<IRegistrationProps, {}> {
   }
   public registration(e: any) {
     e.preventDefault();
-    this.props.registration(
-      this.props.username,
-      this.props.password,
-      this.props.email
-    );
+    this.props.registration({
+      user: {
+        email: this.props.email,
+        password: this.props.password,
+        username: this.props.username
+      }
+    });
   }
   public render() {
     return (
