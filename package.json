@@ -13,6 +13,7 @@
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "@types/superagent": "^4.1.1",
+    "autobind-decorator": "^2.4.0",
     "connected-react-router": "^6.4.0",
     "npm": "^6.9.0",
     "react": "^16.8.6",
