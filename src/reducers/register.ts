@@ -1,23 +1,15 @@
 import { ThunkDispatch } from "redux-thunk";
 import { IRegistrationRequest, registerUser } from "../helpers/apiHelper";
+import { navigateOnFetchSuccess } from "../helpers/helper";
 import { IError } from "../interfaces/IError";
 import { IUser } from "../interfaces/IUser";
-import { AppState } from "../store/rootStore";
-import {
-  CHANGE_VALUE,
-  changeValue,
-  IChangeValueAction
-} from "./actions/changeValueAction";
+import { IAppState } from "../store/rootReducer";
+import { IChangeValueAction } from "./actions/changeValueAction";
 
 export const REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS";
 
-interface IRegistrationState {
-  password: string;
-  email: string;
-  username: string;
-  user?: IUser;
-  errors?: IError;
-}
+// tslint:disable-next-line:no-empty-interface
+export interface IRegistrationState {}
 
 interface IFetchedDataAction {
   type: typeof REGISTRATION_SUCCESS;
@@ -32,34 +24,22 @@ export function registrationSuccess(user: IUser): IFetchedDataAction {
 }
 
 export interface IMapDispatchToProps {
-  changeValue: (key: string, value: string) => void;
   registration: (data: IRegistrationRequest) => void;
 }
 
 export interface IMapStateToProps {
-  email: string;
-  password: string;
-  username: string;
-  errors?: IError;
+  errors: IError | undefined;
 }
 
 export type RegistrationActionTypes = IChangeValueAction | IFetchedDataAction;
 
-const initialState: IRegistrationState = {
-  email: "tulakuss@realworld.com",
-  password: "Password*",
-  username: "tulakuss"
-};
+const initialState: IRegistrationState = {};
 
 export function registrationReducer(
   state: IRegistrationState = initialState,
   action: RegistrationActionTypes
 ): IRegistrationState {
   switch (action.type) {
-    case CHANGE_VALUE:
-      return Object.assign({}, state, {
-        [action.key]: action.value
-      });
     case REGISTRATION_SUCCESS:
       return Object.assign({}, state, {
         user: action.user
@@ -70,28 +50,21 @@ export function registrationReducer(
 }
 
 export const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, any>
+  dispatch: ThunkDispatch<{}, {}, any>,
+  ownprops: any
 ): IMapDispatchToProps => {
   return {
-    changeValue: (key, e) => dispatch(changeValue(key, e)),
-    registration: (data: IRegistrationRequest) => dispatch(registerUser(data))
+    registration: (data: IRegistrationRequest) =>
+      dispatch(navigateOnFetchSuccess(() => registerUser(data), ownprops, "/"))
   };
 };
 
-export const mapStateToProps = (
-  state: AppState,
-  ownprops: any
-): IMapStateToProps => {
+export const mapStateToProps = (state: IAppState): IMapStateToProps => {
   return {
-    email: state.registration.email,
-    errors: state.registration.errors,
-    password: state.registration.password,
-    username: state.registration.username
+    errors: state.error.fetchError
   };
 };
 
 export interface IRegistrationProps
   extends IMapDispatchToProps,
-    IMapStateToProps {
-  errors?: IError;
-}
+    IMapStateToProps {}

@@ -1,3 +1,4 @@
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -6,21 +7,27 @@ import {
   ILoginProps,
   mapDispatchToProps,
   mapStateToProps
-} from "./../reducers/login";
+} from "../reducers/login";
+
+interface ILoginState {
+  email: string;
+  password: string;
+}
 
 class Login extends React.Component<ILoginProps, {}> {
-  constructor(props: ILoginProps) {
-    super(props);
-    this.login = this.login.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-  }
+  public readonly state: ILoginState = {
+    email: "tulakuss@realworld.com",
+    password: "Password*"
+  };
+  @boundMethod
   public handleChange(e: any, key: string) {
-    this.props.changeValue(key, e.target.value);
+    this.setState(Object.assign({}, this.state, { key: e.target.value }));
   }
+  @boundMethod
   public login(e: any) {
     e.preventDefault();
     this.props.login({
-      user: { email: this.props.email, password: this.props.password }
+      user: { email: this.state.email, password: this.state.password }
     });
   }
   public render() {
@@ -34,7 +41,6 @@ class Login extends React.Component<ILoginProps, {}> {
                 <Link to={"/register"}>Need an account?</Link>
               </p>
               <ErrorList errors={this.props.errors} />
-              <p>tady jsou props - {this.props.email}</p>
               <form onSubmit={this.login}>
                 <fieldset className="form-group">
                   <input

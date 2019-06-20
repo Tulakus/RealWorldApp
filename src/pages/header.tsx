@@ -1,7 +1,10 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
-class Header extends React.Component {
+interface IHeaderProps {
+  isAuthenticated: boolean;
+}
+class Header extends React.Component<IHeaderProps> {
   public render() {
     return (
       <div className="auth-page">
@@ -21,21 +24,27 @@ class Header extends React.Component {
                   &nbsp;New Post
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link to={"/settings"} className="nav-link">
-                  &nbsp;Settings
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to={"/login"} className="nav-link">
-                  Sign in
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to={"/register"} className="nav-link ">
-                  Sign up
-                </Link>
-              </li>
+              {this.props.isAuthenticated && (
+                <li className="nav-item">
+                  <Link to={"/settings"} className="nav-link">
+                    &nbsp;Settings
+                  </Link>
+                </li>
+              )}
+              {!this.props.isAuthenticated && (
+                <li className="nav-item">
+                  <Link to={"/login"} className="nav-link">
+                    Sign in
+                  </Link>
+                </li>
+              )}
+              {!this.props.isAuthenticated && (
+                <li className="nav-item">
+                  <Link to={"/register"} className="nav-link ">
+                    Sign up
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </nav>

@@ -1,5 +1,5 @@
 export const LOADING_STARTED = "LOADING_STARTED";
-export const LOADING_FINISHED = "LOADING_STARTED";
+export const LOADING_FINISHED = "LOADING_FINISHED";
 
 const initialLoaderState: ILoaderState = {
   loading: false

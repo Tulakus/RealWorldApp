@@ -9,7 +9,7 @@ import {
 import { IArticle } from "../interfaces/IArticle";
 import { IError } from "../interfaces/IError";
 import { IProfile } from "../interfaces/IProfile";
-import { AppState } from "../store/rootStore";
+import { IAppState } from "../store/rootReducer";
 
 export const PROFILE_FETCH_SUCCESS = "PROFILE_FETCH_SUCCESS";
 export const UNFOLLOW_SUCCESS = "UNFOLLOW_SUCCESS";
@@ -83,7 +83,7 @@ export function profileReducer(
 }
 
 export const mapStateToProps = (
-  state: AppState,
+  state: IAppState,
   ownprops: any
 ): IMapStateToProps => {
   return {

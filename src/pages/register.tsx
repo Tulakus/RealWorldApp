@@ -1,39 +1,38 @@
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { ErrorList } from "../components/error-list";
-import { IError } from "../interfaces/IError";
-import { IUser } from "../interfaces/IUser";
 import {
   IRegistrationProps,
   mapDispatchToProps,
   mapStateToProps
 } from "../reducers/register";
 
-interface IState {
+interface IRegistrationState {
   password?: string;
   email?: string;
-  userName?: string;
-  user?: IUser;
-  errors?: IError;
+  username?: string;
 }
 
 class Register extends React.Component<IRegistrationProps, {}> {
-  public readonly state = {} as IState;
-  constructor(props: IRegistrationProps) {
-    super(props);
-    this.registration = this.registration.bind(this);
-  }
+  public readonly state: IRegistrationState = {
+    email: "tulakuss@realworld.com",
+    password: "Password*",
+    username: "tulakuss"
+  };
+  @boundMethod
   public handleChange(e: any, key: string) {
-    this.props.changeValue(key, e.target.value);
+    this.setState(Object.assign({}, this.state, { [key]: e.target.value }));
   }
+  @boundMethod
   public registration(e: any) {
     e.preventDefault();
     this.props.registration({
       user: {
-        email: this.props.email,
-        password: this.props.password,
-        username: this.props.username
+        email: this.state.email || "",
+        password: this.state.password || "",
+        username: this.state.username || ""
       }
     });
   }
@@ -47,9 +46,7 @@ class Register extends React.Component<IRegistrationProps, {}> {
               <p className="text-xs-center">
                 <Link to={"/login"}>Have an account?</Link>
               </p>
-
               <ErrorList errors={this.props.errors} />
-
               <form onSubmit={this.registration}>
                 <fieldset className="form-group">
                   <input

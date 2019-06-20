@@ -1,5 +1,8 @@
+import autobind from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
+import { ISettingsRequest } from "../helpers/apiHelper";
 import {
   ISettingsnProps,
   mapDispatchToProps,
@@ -23,26 +26,26 @@ class Settings extends React.Component<ISettingsnProps, IState> {
     userName: this.props.userName
   } as IState;
 
-  constructor(props: ISettingsnProps) {
-    super(props);
-    this.updateSettings = this.updateSettings.bind(this);
-  }
-
+  @autobind
   public handleChange(e: any, id: string) {
     this.setState({ [id]: e.target.value });
   }
 
+  @autobind
   public updateSettings(e: any) {
     e.preventDefault();
-    this.props.updateSettings({
+    const settings: ISettingsRequest = {
       user: {
         bio: this.state.userBio,
         email: this.state.email,
         image: this.state.userImage,
-        name: this.state.userName,
-        password: this.state.password
+        name: this.state.userName
       }
-    });
+    };
+    if (!!this.state.password) {
+      settings.user.password = this.state.password;
+    }
+    this.props.updateSettings(settings);
   }
 
   public render() {
@@ -52,7 +55,6 @@ class Settings extends React.Component<ISettingsnProps, IState> {
           <div className="row">
             <div className="col-md-6 offset-md-3 col-xs-12">
               <h1 className="text-xs-center">Your Settings</h1>
-
               <form onSubmit={this.updateSettings}>
                 <fieldset>
                   <fieldset className="form-group">

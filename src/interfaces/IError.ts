@@ -1,3 +1,3 @@
 export interface IError {
-    [s: string]: string[] | undefined;
+  [s: string]: string[];
 }

@@ -1,12 +1,12 @@
-import * as F from "../helpers/dataFetchHelper";
+import F from "../helpers/dataFetchHelper";
 import {
   ARTICLE_FETCH_SUCCESS,
   ARTICLE_LIST_FETCH_SUCCESS,
   FAVORITE_ARTICLE_SUCCESS,
   UNFAVORITE_ARTICLE_SUCCESS
 } from "../reducers/article";
+import { LOGIN_SUCCESS } from "../reducers/authentication";
 import { TAGS_FETCH_SUCCESS } from "../reducers/home";
-import { LOGIN_SUCCESS } from "../reducers/login";
 import {
   FOLLOW_SUCCESS,
   PROFILE_FETCH_SUCCESS,

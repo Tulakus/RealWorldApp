@@ -1,3 +1,4 @@
+import autobind from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Link, RouteComponentProps } from "react-router-dom";
@@ -24,11 +25,6 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
   public readonly state = {
     showFavorited: false
   };
-  constructor(props: IProps & IProfileProps) {
-    super(props);
-    this.handleError = this.handleError.bind(this);
-    this.fetchData = this.fetchData.bind(this);
-  }
   public componentDidMount() {
     this.fetchData({
       author: this.props.match.params.username,
@@ -41,6 +37,7 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
     const params: IMatchParams = props.match.params;
     return !!params.favorited && params.favorited === "favorited";
   }
+
   public fetchData(data: any): void {
     this.props.fetchArticles(data);
   }
@@ -49,9 +46,11 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
       this.setState(error.response.body);
     }
   }
+  @autobind
   public follow(userName: string) {
     this.props.follow(userName);
   }
+  @autobind
   public unfollow(userName: string) {
     this.props.unfollow(userName);
   }

@@ -13,6 +13,12 @@ export interface IProps {
   favorited: boolean;
   slug: string;
 }
+function log(target: any, key: any, descriptor: any) {
+  // tslint:disable-next-line:no-console
+  console.log(
+    `${key} was called! with target${target} and descriptor ${descriptor}`
+  );
+}
 
 export class ArticlePreview extends React.Component<IProps, {}> {
   constructor(props: IProps) {
@@ -24,11 +30,13 @@ export class ArticlePreview extends React.Component<IProps, {}> {
       this.setState(error.response.body);
     }
   }
+  @log
   public favorite(slug: string) {
     request
       .post(`https://conduit.productionready.io/api/articles/${slug}/favorite`)
       .catch(err => this.handleError(err));
   }
+  @log
   public unfavorite(slug: string) {
     request
       .delete(

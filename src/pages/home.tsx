@@ -1,3 +1,4 @@
+import autobind from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { ArticlePreview } from "../components/article-preview";
@@ -22,12 +23,14 @@ class Home extends React.Component<IHomeProps, {}> {
   public handle(e: React.MouseEvent<HTMLElement>) {
     // todo dodelat
   }
-  public handleTagClick = (tag: string) => {
+
+  @autobind
+  public handleTagClick(tag: string) {
     this.setState({
       tag
     });
     this.props.getArticlesWithTag(tag);
-  };
+  }
 
   public render() {
     const tag: string = this.state.tag;

@@ -1,7 +1,7 @@
 import { ThunkDispatch } from "redux-thunk";
 import { ISettingsRequest, updateUserSettings } from "../helpers/apiHelper";
 import { IError } from "../interfaces/IError";
-import { AppState } from "../store/rootStore";
+import { IAppState } from "../store/rootReducer";
 
 export const SETTING_CHANGED_SUCCESSFULLY = "SETTING_CHANGED_SUCCESSFULLY";
 
@@ -18,11 +18,11 @@ export interface ISettingChangedAction {
 }
 
 // tslint:disable-next-line:no-empty-interface
-interface ISettingsState {}
+export interface ISettingsState {}
 
 const initialState: ISettingsState = {};
 
-export const mapStateToProps = (state: AppState) => {
+export const mapStateToProps = (state: IAppState) => {
   return {
     email: "tulakuss@realworld.com",
     password: "",

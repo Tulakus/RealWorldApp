@@ -13,7 +13,7 @@ import {
 import { IArticle } from "../interfaces/IArticle";
 import { IComment } from "../interfaces/IComment";
 import { IError } from "../interfaces/IError";
-import { AppState } from "../store/rootStore";
+import { IAppState } from "../store/rootReducer";
 
 export const ARTICLE_LIST_FETCH_SUCCESS = "ARTICLES_FETCH_SUCCESS";
 export const ARTICLE_FETCH_SUCCESS = "ARTICLE_FETCH_SUCCESS";
@@ -107,6 +107,7 @@ export function articleReducer(
     case ARTICLE_COMMENTS_FETCH_SUCCESS:
     case FAVORITE_ARTICLE_SUCCESS:
     case UNFAVORITE_ARTICLE_SUCCESS:
+      return state;
     // todo finish reducer
     default:
       return state;
@@ -114,7 +115,7 @@ export function articleReducer(
 }
 
 export const mapStateToProps = (
-  state: AppState,
+  state: IAppState,
   ownprops: any
 ): IMapStateToProps => {
   return {

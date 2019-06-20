@@ -2,12 +2,12 @@ import { ThunkDispatch } from "redux-thunk";
 import { getArticles, getTags } from "../helpers/apiHelper";
 import { IArticle } from "../interfaces/IArticle";
 import { IError } from "../interfaces/IError";
-import { AppState } from "../store/rootStore";
+import { IAppState } from "../store/rootReducer";
 
 export const TAGS_FETCH_SUCCESS = "TAGS_FETCH_SUCCESS";
 export const TAG_CHANGED = "TAG_CHANGED";
 
-interface IHomeState {
+export interface IHomeState {
   articlesCount: number;
   articles: IArticle[];
   tags: string[];
@@ -80,7 +80,7 @@ export const mapDispatchToProps = (
 };
 
 export const mapStateToProps = (
-  state: AppState,
+  state: IAppState,
   ownprops: any
 ): IMapStateToProps => {
   return {
