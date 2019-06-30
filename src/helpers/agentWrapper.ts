@@ -3,7 +3,12 @@ import * as request from "superagent";
 import { cleanErrors, ERROR } from "../reducers/errorHandler";
 import { fetchingFinished, fetchingStarted } from "../reducers/loader";
 
-class FetchHelper {
+class AgentWrapper {
+  // tslint:disable-next-line:variable-name
+  private _token: string = "";
+  set Token(token: string) {
+    this._token = token;
+  }
   public post<TRequestData extends object>(
     url: string,
     actionType: string,
@@ -41,23 +46,24 @@ class FetchHelper {
     return (dispatch: ThunkDispatch<{}, {}, any>) => {
       dispatch(fetchingStarted());
       dispatch(cleanErrors());
-      const token =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NTcxOTIsInVzZXJuYW1lIjoidHVsYWt1c3MiLCJleHAiOjE1NjU3OTQ0MzN9.fX9WQlst0tTvdlCNk11sSMjwbpAHIkFtKnek9lKGDWk";
 
-      return agentRequest.set("authorization", `Token ${token}`).then(
-        response => {
-          dispatch(this.onFetchSuccess(actionType, response.body));
-          dispatch(fetchingFinished);
-          return Promise.resolve(response.body);
-        },
-        error => {
-          dispatch(this.onFetchError(error.response));
-          dispatch(fetchingFinished);
-          return Promise.reject(error.response);
-        }
-      );
+      return agentRequest
+        .set("authorization", this._token === "" ? "" : `Token ${this._token}`)
+        .then(
+          response => {
+            dispatch(this.onFetchSuccess(actionType, response.body));
+            dispatch(fetchingFinished);
+            return Promise.resolve(response.body);
+          },
+          error => {
+            dispatch(this.onFetchError(error.response));
+            dispatch(fetchingFinished);
+            return Promise.reject(error.response);
+          }
+        );
     };
   }
+
   private onFetchSuccess(type: string, response: request.Response) {
     return {
       payload: JSON.stringify(response),
@@ -73,4 +79,4 @@ class FetchHelper {
   }
 }
 
-export default new FetchHelper();
+export default new AgentWrapper();
