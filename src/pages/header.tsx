@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 interface IHeaderProps {
   isAuthenticated: boolean;
+  userName: string | undefined;
 }
 class Header extends React.Component<IHeaderProps> {
   public render() {
@@ -42,6 +43,16 @@ class Header extends React.Component<IHeaderProps> {
                 <li className="nav-item">
                   <Link to={"/register"} className="nav-link ">
                     Sign up
+                  </Link>
+                </li>
+              )}
+              {this.props.isAuthenticated && (
+                <li className="nav-item">
+                  <Link
+                    to={`/profile/${this.props.userName}`}
+                    className="nav-link "
+                  >
+                    {this.props.userName}
                   </Link>
                 </li>
               )}

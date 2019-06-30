@@ -1,10 +1,9 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
 import { ISettingsRequest } from "../helpers/apiHelper";
 import {
-  ISettingsnProps,
+  ISettingsnProps as ISettingsProps,
   mapDispatchToProps,
   mapStateToProps
 } from "../reducers/settings";
@@ -12,20 +11,19 @@ import {
 interface IState {
   password?: string;
   email?: string;
-  userName?: string;
-  userBio?: string;
-  userImage?: string;
+  username?: string;
+  bio?: string;
+  image?: string;
 }
 
-class Settings extends React.Component<ISettingsnProps, IState> {
-  public readonly state = {
+class Settings extends React.Component<ISettingsProps, IState> {
+  public readonly state: IState = {
+    bio: this.props.bio,
     email: this.props.email,
-    password: this.props.password,
-    userBio: this.props.userBio,
-    userImage: this.props.userImage,
-    userName: this.props.userName
-  } as IState;
-
+    image: this.props.image,
+    password: undefined,
+    username: this.props.username
+  };
   @autobind
   public handleChange(e: any, id: string) {
     this.setState({ [id]: e.target.value });
@@ -36,10 +34,10 @@ class Settings extends React.Component<ISettingsnProps, IState> {
     e.preventDefault();
     const settings: ISettingsRequest = {
       user: {
-        bio: this.state.userBio,
+        bio: this.state.bio,
         email: this.state.email,
-        image: this.state.userImage,
-        name: this.state.userName
+        image: this.state.image,
+        name: this.state.username
       }
     };
     if (!!this.state.password) {
@@ -62,8 +60,8 @@ class Settings extends React.Component<ISettingsnProps, IState> {
                       className="form-control"
                       type="text"
                       placeholder="URL of profile picture"
-                      onChange={e => this.handleChange(e, "userImage")}
-                      value={this.state.userImage}
+                      onChange={e => this.handleChange(e, "image")}
+                      value={this.state.image}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -71,8 +69,8 @@ class Settings extends React.Component<ISettingsnProps, IState> {
                       className="form-control form-control-lg"
                       type="text"
                       placeholder="Your Name"
-                      onChange={e => this.handleChange(e, "userName")}
-                      value={this.state.userName}
+                      onChange={e => this.handleChange(e, "username")}
+                      value={this.state.username}
                     />
                   </fieldset>
                   <fieldset className="form-group">
@@ -80,8 +78,8 @@ class Settings extends React.Component<ISettingsnProps, IState> {
                       className="form-control form-control-lg"
                       rows={8}
                       placeholder="Short bio about you"
-                      onChange={e => this.handleChange(e, "userBio")}
-                      value={this.state.userBio}
+                      onChange={e => this.handleChange(e, "bio")}
+                      value={this.state.bio}
                     />
                   </fieldset>
                   <fieldset className="form-group">

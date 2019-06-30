@@ -1,34 +1,25 @@
 import { ThunkDispatch } from "redux-thunk";
 import { ISettingsRequest, updateUserSettings } from "../helpers/apiHelper";
+import { navigateOnFetchSuccess } from "../helpers/helper";
 import { IError } from "../interfaces/IError";
 import { IAppState } from "../store/rootReducer";
-
-export const SETTING_CHANGED_SUCCESSFULLY = "SETTING_CHANGED_SUCCESSFULLY";
 
 export interface IMapStateToProps {
   password?: string;
   email?: string;
-  userName?: string;
-  userBio?: string;
-  userImage?: string;
+  username?: string;
+  bio?: string;
+  image?: string;
 }
-export interface ISettingChangedAction {
-  type: typeof SETTING_CHANGED_SUCCESSFULLY;
-  payload: string;
-}
-
-// tslint:disable-next-line:no-empty-interface
-export interface ISettingsState {}
-
-const initialState: ISettingsState = {};
 
 export const mapStateToProps = (state: IAppState) => {
+  const user = state.authentication.user!;
   return {
-    email: "tulakuss@realworld.com",
+    bio: user.bio,
+    email: user.email,
+    image: user.image,
     password: "",
-    userBio: "i am Grut",
-    userImage: "http://todo",
-    userName: "tulakuss"
+    username: user.username
   };
 };
 
@@ -37,29 +28,16 @@ export interface IMapDispatchToProps {
 }
 
 export const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, any>
+  dispatch: ThunkDispatch<{}, {}, any>,
+  ownProps: any
 ): IMapDispatchToProps => {
   return {
     updateSettings: (data: ISettingsRequest) =>
-      dispatch(updateUserSettings(data))
+      dispatch(
+        navigateOnFetchSuccess(() => updateUserSettings(data), ownProps, "/")
+      )
   };
 };
-
-export type SettingsActionTypes = ISettingChangedAction;
-
-export function settingsReducer(
-  state: ISettingsState = initialState,
-  action: SettingsActionTypes
-): ISettingsState {
-  switch (action.type) {
-    case SETTING_CHANGED_SUCCESSFULLY:
-      return Object.assign({}, state, {
-        user: JSON.parse(action.payload).user
-      });
-    default:
-      return state;
-  }
-}
 
 export interface ISettingsnProps extends IMapDispatchToProps, IMapStateToProps {
   errors?: IError;

@@ -1,11 +1,16 @@
-import F from "../helpers/dataFetchHelper";
 import {
+  ARTICLE_COMMENTS_FETCH_SUCCESS,
+  ARTICLE_FEED_LIST_FETCH_SUCCESS,
   ARTICLE_FETCH_SUCCESS,
   ARTICLE_LIST_FETCH_SUCCESS,
   FAVORITE_ARTICLE_SUCCESS,
   UNFAVORITE_ARTICLE_SUCCESS
 } from "../reducers/article";
 import { LOGIN_SUCCESS } from "../reducers/authentication";
+import {
+  USER_INFO_CHANGED_SUCCESSFULLY,
+  USER_INFO_FETCHED_SUCCESSFULLY
+} from "../reducers/authentication";
 import { TAGS_FETCH_SUCCESS } from "../reducers/home";
 import {
   FOLLOW_SUCCESS,
@@ -13,15 +18,24 @@ import {
   UNFOLLOW_SUCCESS
 } from "../reducers/profile";
 import { REGISTRATION_SUCCESS } from "../reducers/register";
-import { SETTING_CHANGED_SUCCESSFULLY } from "../reducers/settings";
+import F from "./agentWrapper";
 
 export interface IArticleListQuery {
   limit: number;
   offset: number;
   tag?: string;
+  favorited?: string;
+  author?: string;
 }
 
-export const getArticles = (data: IArticleListQuery) =>
+export const getArticleFeedList = (data: IArticleListQuery) =>
+  F.get<IArticleListQuery>(
+    "https://conduit.productionready.io/api/articles/feed",
+    ARTICLE_FEED_LIST_FETCH_SUCCESS,
+    data
+  );
+
+export const getArticleList = (data: IArticleListQuery) =>
   F.get<IArticleListQuery>(
     "https://conduit.productionready.io/api/articles",
     ARTICLE_LIST_FETCH_SUCCESS,
@@ -31,7 +45,7 @@ export const getArticles = (data: IArticleListQuery) =>
 // tslint:disable-next-line:no-empty-interface
 interface ITagsQuery {}
 
-export const getTags = () =>
+export const getTagList = () =>
   F.get<ITagsQuery>(
     "https://conduit.productionready.io/api/tags",
     TAGS_FETCH_SUCCESS
@@ -51,6 +65,7 @@ export const login = (data: ILoginRequest) =>
 export interface IProfileQuery {
   user: string;
 }
+
 export const getProfile = (data: IProfileQuery) =>
   F.get(
     `https://conduit.productionready.io/api/profiles/${data.user}`,
@@ -94,10 +109,19 @@ export interface ISettingsRequest {
   };
 }
 
+// tslint:disable-next-line:no-empty-interface
+export interface IUserInfoRequest {}
+
+export const getCurrentUserInfo = () =>
+  F.get<IUserInfoRequest>(
+    "https://conduit.productionready.io/api/user",
+    USER_INFO_FETCHED_SUCCESSFULLY
+  );
+
 export const updateUserSettings = (data: ISettingsRequest) =>
   F.put<ISettingsRequest>(
     "https://conduit.productionready.io/api/user",
-    SETTING_CHANGED_SUCCESSFULLY,
+    USER_INFO_CHANGED_SUCCESSFULLY,
     data
   );
 
@@ -134,5 +158,5 @@ export interface IArticleCommentsQuery {
 export const getArticleComments = (data: IArticleCommentsQuery) =>
   F.get<IArticleCommentsQuery>(
     `https://conduit.productionready.io/api/articles/${data.slug}/comments`,
-    ARTICLE_FETCH_SUCCESS
+    ARTICLE_COMMENTS_FETCH_SUCCESS
   );

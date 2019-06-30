@@ -1,30 +1,39 @@
 import * as React from "react";
 
+const DEFAULT_ITEMS_PER_PAGE = 10;
+
 interface IPagination {
-  pages: number;
+  items: number;
+  itemsPerPage?: number;
+  selectedPage: number;
+  handleClick: (index: number) => void;
 }
 
-export class Pagination extends React.Component<IPagination> {
-  public createPagination(): any[] | null {
-    const pages = [];
-    if (this.props.pages === 0) {
-      return null;
-    }
-    for (let i = 1; i <= this.props.pages; i++) {
-      // TODO add highlight active page logic
-      pages.push(
-        <li className={i === 1 ? "page-item active" : "page-item"}>
-          <a className="page-link">{i}</a>
-        </li>
-      );
-    }
-    return pages;
-  }
-  public render() {
-    return (
-      <div>
-        <ul className="pagination">{this.createPagination()}</ul>
-      </div>
+const createPagination = (props: IPagination) => {
+  const pages = [];
+  const pagesCount: number = Math.ceil(
+    props.items / (props.itemsPerPage || DEFAULT_ITEMS_PER_PAGE)
+  );
+  for (let i = 0; i < pagesCount; i++) {
+    pages.push(
+      <li
+        className={i === props.selectedPage ? "page-item active" : "page-item"}
+        onClick={e => {
+          props.handleClick(i);
+        }}
+        key={i}
+      >
+        <a className="page-link">{i + 1}</a>
+      </li>
     );
   }
+  return pages;
+};
+
+export function Pagination(props: IPagination) {
+  return props.items === 0 ? null : (
+    <div>
+      <ul className="pagination">{createPagination(props)}</ul>
+    </div>
+  );
 }

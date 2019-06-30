@@ -1,74 +1,53 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import * as request from "superagent";
+import { IFavoriteRequest } from "../helpers/apiHelper";
 import { getDate } from "../helpers/helper";
+import { IArticle } from "../interfaces/IArticle";
+import { IAuthor } from "../interfaces/IAuthor";
 
 export interface IProps {
-  img: string;
-  name: string;
-  date: string;
-  articleName: string;
-  description: string;
-  favoriteCount: number;
-  favorited: boolean;
-  slug: string;
-}
-function log(target: any, key: any, descriptor: any) {
-  // tslint:disable-next-line:no-console
-  console.log(
-    `${key} was called! with target${target} and descriptor ${descriptor}`
-  );
+  article: IArticle;
+  favorite: (data: IFavoriteRequest) => void;
+  unfavorite: (data: IFavoriteRequest) => void;
 }
 
 export class ArticlePreview extends React.Component<IProps, {}> {
-  constructor(props: IProps) {
-    super(props);
-    this.handleError = this.handleError.bind(this);
-  }
-  public handleError(error: any) {
-    if (error.response.statusCode === 401) {
-      this.setState(error.response.body);
-    }
-  }
-  @log
-  public favorite(slug: string) {
-    request
-      .post(`https://conduit.productionready.io/api/articles/${slug}/favorite`)
-      .catch(err => this.handleError(err));
-  }
-  @log
-  public unfavorite(slug: string) {
-    request
-      .delete(
-        `https://conduit.productionready.io/api/articles/${slug}/favorite`
-      )
-      .catch(err => this.handleError(err));
-  }
   public render() {
-    const action = this.props.favorited ? this.unfavorite : this.favorite;
+    const article: IArticle = this.props.article;
+    const author: IAuthor = article.author;
     return (
       <div className="article-preview">
         <div className="article-meta">
-          <Link to={`/profile/${this.props.name}`}>
-            <img src={this.props.img} />
+          <Link to={`/profile/${this.props.article.author.username}`}>
+            <img src={author.image} />
           </Link>
           <div className="info">
-            <Link to={`/profile/${this.props.name}`} className="author">
-              {this.props.name}
+            <Link to={`/profile/${author.username}`} className="author">
+              {author.username}
             </Link>
-            <span className="date">{getDate(this.props.date)}</span>
+            <span className="date">{getDate(article.createdAt)}</span>
           </div>
           <button
             className="btn btn-outline-primary btn-sm pull-xs-right"
-            onClick={e => action(this.props.slug)}
+            onClick={e =>
+              article.favorited
+                ? this.props.unfavorite({ slug: article.slug })
+                : this.props.favorite({ slug: article.slug })
+            }
           >
-            <i className="ion-heart" /> {this.props.favoriteCount}
+            <i className="ion-heart" /> {article.favoritesCount}
           </button>
         </div>
-        <Link to={`/article/${this.props.slug}`} className="preview-link">
-          <h1>{this.props.articleName}</h1>
-          <p>{this.props.description}</p>
+        <Link to={`/article/${article.slug}`} className="preview-link">
+          <h1>{article.title}</h1>
+          <p>{article.description}</p>
           <span>Read more...</span>
+          <ul className="tag-list">
+            {!!article.tagList &&
+              article.tagList.map(i => (
+                <li className="tag-default tag-pill tag-outline">{i}</li>
+              ))}
+          </ul>
         </Link>
       </div>
     );

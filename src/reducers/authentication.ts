@@ -2,6 +2,9 @@ import { IUser } from "../interfaces/IUser";
 
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS";
+export const LOGOUT_SUCCES = "LOGOUT_SUCCES";
+export const USER_INFO_CHANGED_SUCCESSFULLY = "USER_INFO_CHANGED_SUCCESSFULLY";
+export const USER_INFO_FETCHED_SUCCESSFULLY = "USER_INFO_FETCHED_SUCCESSFULLY";
 
 export interface IAuthenticationState {
   user: IUser | undefined;
@@ -18,7 +21,21 @@ interface IRegisterDataAction {
   payload: string;
 }
 
-export type AuthenticationActionTypes = ILoginDataAction | IRegisterDataAction;
+interface ILogoutAction {
+  type: typeof LOGOUT_SUCCES;
+  payload: string;
+}
+
+export interface ISettingChangedAction {
+  type: typeof USER_INFO_CHANGED_SUCCESSFULLY;
+  payload: string;
+}
+
+export type AuthenticationActionTypes =
+  | ILoginDataAction
+  | IRegisterDataAction
+  | ILogoutAction
+  | ISettingChangedAction;
 
 const initialState: IAuthenticationState = {
   isLogged: false,
@@ -33,12 +50,15 @@ export function authenticationReducer(
     case LOGIN_SUCCESS:
     case REGISTRATION_SUCCESS:
       const userInfo: IUser = JSON.parse(action.payload).user;
-      const jwtToken = userInfo.token;
-      localStorage.setItem("jwt", jwtToken);
-
       return Object.assign({}, state, {
         isLogged: true,
         user: userInfo
+      });
+    case LOGOUT_SUCCES:
+    case USER_INFO_CHANGED_SUCCESSFULLY:
+      return Object.assign({}, state, {
+        isLogged: true,
+        user: JSON.parse(action.payload).user
       });
     default:
       return state;

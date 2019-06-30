@@ -1,5 +1,12 @@
 import { ThunkDispatch } from "redux-thunk";
-import { getArticles, getTags } from "../helpers/apiHelper";
+import {
+  favoriteArticle,
+  getArticleFeedList,
+  getArticleList,
+  getTagList,
+  IFavoriteRequest,
+  unfavoriteArticle
+} from "../helpers/apiHelper";
 import { IArticle } from "../interfaces/IArticle";
 import { IError } from "../interfaces/IError";
 import { IAppState } from "../store/rootReducer";
@@ -8,7 +15,7 @@ export const TAGS_FETCH_SUCCESS = "TAGS_FETCH_SUCCESS";
 export const TAG_CHANGED = "TAG_CHANGED";
 
 export interface IHomeState {
-  articlesCount: number;
+  articlesCount: { count: number };
   articles: IArticle[];
   tags: string[];
 }
@@ -19,14 +26,17 @@ interface IFetchedTagsDataAction {
 }
 
 export interface IMapDispatchToProps {
-  getArticles: () => void;
-  getArticlesWithTag: (tag: string) => void;
+  getArticleFeedList: (offset: number) => void;
+  getArticleList: (offset: number) => void;
+  getArticleListWithTag: (offset: number, tag: string) => void;
   getTags: () => void;
+  favorite: (data: IFavoriteRequest) => void;
+  unfavorite: (data: IFavoriteRequest) => void;
 }
 
 export interface IMapStateToProps {
   articles: IArticle[];
-  articlesCount: number;
+  articlesCount: { count: number };
   tags: string[];
 }
 
@@ -34,7 +44,7 @@ export type LoginActionTypes = IFetchedTagsDataAction;
 
 const initialState: IHomeState = {
   articles: [],
-  articlesCount: 0,
+  articlesCount: { count: 0 },
   tags: []
 };
 
@@ -56,26 +66,36 @@ export const mapDispatchToProps = (
   dispatch: ThunkDispatch<{}, {}, any>
 ): IMapDispatchToProps => {
   return {
-    getArticles: () => {
+    favorite: (data: IFavoriteRequest) => dispatch(favoriteArticle(data)),
+    getArticleFeedList: (offset: number) => {
       dispatch(
-        getArticles({
+        getArticleFeedList({
           limit: 10,
-          offset: 0
+          offset: offset * 10
         })
       );
     },
-    getArticlesWithTag: (tag: string) => {
+    getArticleList: (offset: number) => {
       dispatch(
-        getArticles({
+        getArticleList({
           limit: 10,
-          offset: 0,
+          offset: offset * 10
+        })
+      );
+    },
+    getArticleListWithTag: (offset: number, tag: string) => {
+      dispatch(
+        getArticleList({
+          limit: 10,
+          offset: offset * 10,
           tag
         })
       );
     },
     getTags: () => {
-      dispatch(getTags());
-    }
+      dispatch(getTagList());
+    },
+    unfavorite: (data: IFavoriteRequest) => dispatch(unfavoriteArticle(data))
   };
 };
 
@@ -92,4 +112,5 @@ export const mapStateToProps = (
 
 export interface IHomeProps extends IMapDispatchToProps, IMapStateToProps {
   errors?: IError;
+  isAuthenticated: boolean;
 }

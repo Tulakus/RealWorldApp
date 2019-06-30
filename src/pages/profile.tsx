@@ -1,9 +1,10 @@
-import autobind from "autobind-decorator";
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { ArticlePreview } from "../components/article-preview";
 import { Pagination } from "../components/pagination";
+import { IArticle } from "../interfaces/IArticle";
 import {
   IProfileProps,
   mapDispatchToProps,
@@ -18,46 +19,42 @@ interface IMatchParams {
 interface IProps extends RouteComponentProps<IMatchParams> {}
 
 interface IState {
-  showFavorited: boolean;
+  username: string;
+  page: number;
 }
 
 class Profile extends React.Component<IProps & IProfileProps, IState> {
-  public readonly state = {
-    showFavorited: false
+  public readonly state: IState = {
+    page: 1,
+    username: this.props.match.params.username
   };
   public componentDidMount() {
-    this.fetchData({
-      author: this.props.match.params.username,
-      limit: 5,
-      offset: 0
-    });
+    this.showFavorited()
+      ? this.props.getFavoritedArticles(0, this.state.username) // 1 -> pagination starts at index 1
+      : this.props.getAuthorArticles(0, this.state.username);
+    this.props.getProfile(this.state.username);
   }
 
-  public showFavorited(props: IProps): boolean {
-    const params: IMatchParams = props.match.params;
+  public showFavorited(): boolean {
+    const params: IMatchParams = this.props.match.params;
     return !!params.favorited && params.favorited === "favorited";
   }
 
-  public fetchData(data: any): void {
-    this.props.fetchArticles(data);
-  }
-  public handleError(error: any) {
-    if (error.response.statusCode === 401) {
-      this.setState(error.response.body);
-    }
-  }
-  @autobind
+  @boundMethod
   public follow(userName: string) {
     this.props.follow(userName);
   }
-  @autobind
+  @boundMethod
   public unfollow(userName: string) {
     this.props.unfollow(userName);
   }
   public render() {
     const articles = this.props.articles;
     const profile = this.props.profile;
-    const username = this.props.match.params.username;
+    const showFavorited: boolean = this.showFavorited();
+    const onClickAction = showFavorited
+      ? this.props.getFavoritedArticles
+      : this.props.getAuthorArticles;
     return (
       <div className="profile-page">
         <div className="user-info">
@@ -97,33 +94,30 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
                 <ul className="nav nav-pills outline-active">
                   <li className="nav-item">
                     <Link
-                      to={`/profile/${username}`}
-                      className={
-                        this.state.showFavorited
-                          ? "nav-link"
-                          : "nav-link active"
-                      }
+                      to={`/profile/${this.state.username}`}
+                      className={showFavorited ? "nav-link" : "nav-link active"}
                       href=""
+                      onClick={e => {
+                        this.setState({
+                          page: 1
+                        });
+                        this.props.getAuthorArticles(0, this.state.username);
+                      }}
                     >
                       My Articles
                     </Link>
                   </li>
                   <li className="nav-item">
                     <Link
-                      to={`/profile/${username}/favorited`}
-                      className={
-                        this.state.showFavorited
-                          ? "nav-link active"
-                          : "nav-link"
-                      }
+                      to={`/profile/${this.state.username}/favorited`}
+                      className={showFavorited ? "nav-link active" : "nav-link"}
                       href=""
-                      onClick={e =>
-                        this.fetchData({
-                          favorited: username,
-                          limit: 5,
-                          offset: 0
-                        })
-                      }
+                      onClick={e => {
+                        this.setState({
+                          page: 1
+                        });
+                        this.props.getFavoritedArticles(0, this.state.username);
+                      }}
                     >
                       Favorited Articles
                     </Link>
@@ -132,20 +126,24 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
               </div>
 
               {!!articles &&
-                articles.map(article => (
+                articles.map((article: IArticle) => (
                   <ArticlePreview
-                    img={article.author.image}
-                    name={article.author.username}
-                    date={article.createdAt}
-                    articleName={article.title}
-                    description={article.description}
-                    favoriteCount={article.favoritesCount}
-                    favorited={article.favorited}
-                    slug={article.slug}
+                    article={article}
+                    favorite={this.props.favorite}
+                    unfavorite={this.props.unfavorite}
                   />
                 ))}
 
-              <Pagination pages={this.props.articlesCount} />
+              <Pagination
+                items={this.props.articlesCount.count}
+                handleClick={(i: number) => {
+                  this.setState({
+                    page: i
+                  });
+                  onClickAction(i, this.state.username);
+                }}
+                selectedPage={this.state.page}
+              />
             </div>
           </div>
         </div>

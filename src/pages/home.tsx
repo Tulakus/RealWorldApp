@@ -1,40 +1,120 @@
-import autobind from "autobind-decorator";
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { ArticlePreview } from "../components/article-preview";
 import { Pagination } from "../components/pagination";
 import { Sidebar } from "../components/sidebar";
 import { TagsList } from "../components/tag-list";
-import { getDate } from "../helpers/helper";
+import { IFavoriteRequest, unfavoriteArticle } from "../helpers/apiHelper";
+import { IArticle } from "../interfaces/IArticle";
 import {
   IHomeProps,
   mapDispatchToProps,
   mapStateToProps
 } from "./../reducers/home";
 
-class Home extends React.Component<IHomeProps, {}> {
+interface IArticleList {
+  articles: IArticle[];
+  articlesCount: { count: number };
+  itemsPerPage?: number;
+  selectedPage: number;
+  handlePaginationClick: (index: number) => void;
+  favorite: (data: IFavoriteRequest) => void;
+  unfavorite: (data: IFavoriteRequest) => void;
+}
+
+const ArticleList = (props: IArticleList) => {
+  return (
+    <div>
+      {props.articles.length === 0 ? (
+        <div>No articles are here... yet.</div>
+      ) : (
+        props.articles.map((i: IArticle) => (
+          <ArticlePreview
+            article={i}
+            favorite={props.favorite}
+            unfavorite={props.unfavorite}
+          />
+        ))
+      )}
+      <Pagination
+        items={props.articlesCount.count}
+        handleClick={props.handlePaginationClick}
+        selectedPage={props.selectedPage}
+        itemsPerPage={10}
+      />
+    </div>
+  );
+};
+
+enum SelectedFeed {
+  Personal,
+  Global,
+  Tag
+}
+
+interface IHomeState {
+  tag: string;
+  feed: SelectedFeed;
+  page: number;
+}
+
+class Home extends React.Component<IHomeProps, IHomeState> {
   public readonly state = {
+    feed: this.props.isAuthenticated
+      ? SelectedFeed.Personal
+      : SelectedFeed.Global,
+    page: 1,
     tag: ""
   };
+
   public componentDidMount() {
-    this.props.getArticles();
+    this.getItems(this.state.page, this.state.feed);
     this.props.getTags();
   }
-  public handle(e: React.MouseEvent<HTMLElement>) {
-    // todo dodelat
+
+  public handleFeedChange(
+    feed: SelectedFeed,
+    e: React.MouseEvent<HTMLElement>
+  ) {
+    e.preventDefault();
+    this.setState({
+      feed,
+      page: 1,
+      tag: ""
+    });
+    this.getItems(1, feed);
   }
 
-  @autobind
+  @boundMethod
   public handleTagClick(tag: string) {
     this.setState({
+      feed: SelectedFeed.Tag,
+      page: 1,
       tag
     });
-    this.props.getArticlesWithTag(tag);
+    this.props.getArticleListWithTag(0, tag);
+  }
+
+  @boundMethod
+  public getItems(page: number = 0, feed: SelectedFeed) {
+    const offset: number = page;
+    switch (feed) {
+      case SelectedFeed.Personal:
+        this.props.getArticleFeedList(offset);
+        break;
+      case SelectedFeed.Global:
+        this.props.getArticleList(offset);
+        break;
+      case SelectedFeed.Tag:
+        this.props.getArticleListWithTag(offset, this.state.tag);
+        break;
+    }
   }
 
   public render() {
     const tag: string = this.state.tag;
-    const isActive = tag !== "";
+    const isSelectedTag = this.state.tag !== "";
     return (
       <div className="home-page">
         <div className="banner">
@@ -49,10 +129,39 @@ class Home extends React.Component<IHomeProps, {}> {
             <div className="col-md-9">
               <div className="feed-toggle">
                 <ul className="nav nav-pills outline-active">
-                  <li className="nav-item" onClick={e => this.handle}>
+                  {this.props.isAuthenticated && (
+                    <li
+                      className="nav-item"
+                      onClick={e => {
+                        this.handleFeedChange(SelectedFeed.Personal, e);
+                      }}
+                    >
+                      <a
+                        href=""
+                        className={
+                          this.state.feed === SelectedFeed.Personal &&
+                          !isSelectedTag
+                            ? "nav-link active"
+                            : "nav-link"
+                        }
+                      >
+                        Your Feed
+                      </a>
+                    </li>
+                  )}
+                  <li
+                    className="nav-item"
+                    onClick={e => {
+                      this.handleFeedChange(SelectedFeed.Global, e);
+                    }}
+                  >
                     <a
                       href=""
-                      className={isActive ? "nav-link" : "nav-link active"}
+                      className={
+                        this.state.feed === SelectedFeed.Global
+                          ? "nav-link active"
+                          : "nav-link"
+                      }
                     >
                       Global Feed
                     </a>
@@ -60,8 +169,12 @@ class Home extends React.Component<IHomeProps, {}> {
                   {!!tag && tag !== "" && (
                     <li className="nav-item">
                       <a
-                        className={isActive ? "nav-link active" : "nav-link"}
-                        href="/"
+                        className={
+                          this.state.feed === SelectedFeed.Tag && isSelectedTag
+                            ? "nav-link active"
+                            : "nav-link"
+                        }
+                        href=""
                         onClick={e => e.preventDefault()}
                       >
                         {"#" + tag}
@@ -70,35 +183,30 @@ class Home extends React.Component<IHomeProps, {}> {
                   )}
                 </ul>
               </div>
-              {this.props.articles.length > 0 &&
-                this.props.articles.map(i => (
-                  <ArticlePreview
-                    img={i.author.image}
-                    name={i.author.username}
-                    date={getDate(i.createdAt)}
-                    articleName={i.title}
-                    favoriteCount={i.favoritesCount}
-                    description={i.description}
-                    slug={i.slug}
-                    favorited={i.favorited}
-                  />
-                ))}
+              <ArticleList
+                articles={this.props.articles}
+                articlesCount={this.props.articlesCount}
+                selectedPage={this.state.page}
+                handlePaginationClick={(i: number) => {
+                  this.setState({
+                    page: i
+                  });
+                  this.getItems(i, this.state.feed);
+                }}
+                favorite={this.props.favorite}
+                unfavorite={this.props.unfavorite}
+              />
             </div>
             <div className="col-md-3">
-              {
-                <Sidebar title={"Popular Tags"}>
-                  {
-                    <TagsList
-                      tags={this.props.tags}
-                      onClick={this.handleTagClick}
-                    />
-                  }
-                </Sidebar>
-              }
+              <Sidebar title={"Popular Tags"}>
+                <TagsList
+                  tags={this.props.tags}
+                  onClick={this.handleTagClick}
+                />
+              </Sidebar>
             </div>
           </div>
         </div>
-        <Pagination pages={Math.floor(this.props.articlesCount / 10)} />
       </div>
     );
   }
