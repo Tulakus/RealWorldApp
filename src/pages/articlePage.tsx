@@ -1,6 +1,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { RouteComponentProps } from "react-router";
+import { Link } from "react-router-dom";
 import { ArticleMeta } from "../components/article-meta";
 import { Banner } from "../components/banner";
 import { Card } from "../components/card";
@@ -17,7 +18,7 @@ interface IMatchParams {
 
 interface IProps extends RouteComponentProps<IMatchParams> {}
 
-class ArticlePreview extends React.Component<IProps & IArticleProps> {
+class ArticlePage extends React.Component<IProps & IArticleProps> {
   public componentDidMount() {
     this.props.fetchArticle({ slug: this.props.match.params.slug });
     this.props.fetchArticleComments({ slug: this.props.match.params.slug });
@@ -26,7 +27,7 @@ class ArticlePreview extends React.Component<IProps & IArticleProps> {
     const article = this.props.article;
     return (
       <div className="article-page">
-        {!!article && (
+        {
           <Banner title={article.title}>
             <ArticleMeta
               img={!!article.author && article.author.image}
@@ -38,7 +39,7 @@ class ArticlePreview extends React.Component<IProps & IArticleProps> {
               slug={article.slug}
             />
           </Banner>
-        )}
+        }
 
         <div className="container page">
           <div className="row article-content">
@@ -63,7 +64,11 @@ class ArticlePreview extends React.Component<IProps & IArticleProps> {
 
           <div className="row">
             <div className="col-xs-12 col-md-8 offset-md-2">
-              <div>Sign in or sign up to add comments on this article.</div>
+              <div>
+                <Link to={"/login"}>Sign in</Link> or{" "}
+                <Link to={"/register"}>sign up</Link> to add comments on this
+                article.
+              </div>
               {!!this.props.articleComments &&
                 this.props.articleComments.map(comment => (
                   <Card
@@ -71,6 +76,7 @@ class ArticlePreview extends React.Component<IProps & IArticleProps> {
                     comment={comment.body}
                     name={comment.author.username}
                     date={getDate(comment.createdAt)}
+                    // isAuthor= {comment.author === }
                   />
                 ))}
 
@@ -97,4 +103,4 @@ class ArticlePreview extends React.Component<IProps & IArticleProps> {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(ArticlePreview);
+)(ArticlePage);
