@@ -5,6 +5,7 @@ interface IHeaderProps {
   isAuthenticated: boolean;
   userName: string | undefined;
 }
+
 class Header extends React.Component<IHeaderProps> {
   public render() {
     return (
@@ -21,7 +22,7 @@ class Header extends React.Component<IHeaderProps> {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link to={"/settings"} className="nav-link">
+                <Link to={"/editor"} className="nav-link">
                   &nbsp;New Post
                 </Link>
               </li>

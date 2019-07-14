@@ -6,6 +6,7 @@ import thunk from "redux-thunk";
 import auth from "../helpers/authenticationMiddleware";
 import logger from "../helpers/loggerMiddleware";
 import { articleReducer, IArticleState } from "../reducers/article";
+import { editorReducer, IArticleEditorState } from "../reducers/article-editor";
 import {
   authenticationReducer,
   IAuthenticationState
@@ -20,6 +21,7 @@ export function createRootReducer(history: any): Reducer<IAppState> {
   return combineReducers({
     article: articleReducer,
     authentication: authenticationReducer,
+    editor: editorReducer,
     error: errorHandlingReducer,
     home: homeReducer,
     loader: loaderReducer,
@@ -38,6 +40,7 @@ export interface IAppState {
   loader: ILoaderState;
   profile: IProfileState;
   registration: IRegistrationState;
+  editor: IArticleEditorState;
 }
 
 export const browserHistory = createBrowserHistory();

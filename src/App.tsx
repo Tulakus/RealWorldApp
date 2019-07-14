@@ -1,37 +1,38 @@
+import { boundMethod } from "autobind-decorator";
 import { ConnectedRouter } from "connected-react-router";
 import React from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { ThunkDispatch } from "redux-thunk";
 import "./App.css";
 import agentWrapper from "./helpers/agentWrapper";
-import { getCurrentUserInfo } from "./helpers/apiHelper";
 import { TOKEN } from "./helpers/authenticationMiddleware";
-import { IUser } from "./interfaces/IUser";
-import ArticlePage from "./pages/articlePage";
+import ArticleEditor from "./pages/article-editor";
+import ArticlePage from "./pages/article-page";
 import { Header } from "./pages/header";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Profile from "./pages/profile";
 import Register from "./pages/register";
 import Settings from "./pages/settings";
-import { browserHistory, IAppState } from "./store/rootReducer";
+import { IAppProps, mapDispatchToProps, mapStateToProps } from "./reducers/app";
+import { browserHistory } from "./store/rootReducer";
 
-interface IAppProps {
-  isAuthenticated: boolean;
-  user: IUser | undefined;
-}
-
-class App extends React.Component<IAppProps & IMapDispatchToProps> {
+class App extends React.Component<IAppProps> {
   public componentWillMount() {
     const token = localStorage.getItem(TOKEN);
     if (!!token) {
       agentWrapper.Token = token;
-      if (!!this.props.user) {
-        this.props.getUserInfo();
+      if (!this.props.user) {
+        this.getInfo();
       }
     }
   }
+
+  @boundMethod
+  public getInfo() {
+    this.props.getUserInfo();
+  }
+
   public render() {
     return (
       <ConnectedRouter history={browserHistory}>
@@ -54,6 +55,7 @@ class App extends React.Component<IAppProps & IMapDispatchToProps> {
             <Route path={"/login"} component={Login} />
             <Route path={"/settings"} component={Settings} />
             <Route path={"/article/:slug"} component={ArticlePage} />
+            <Route path={"/editor/:slug?"} component={ArticleEditor} />
             <Route
               path={"/profile/:username/:favorited?"}
               component={Profile}
@@ -65,25 +67,6 @@ class App extends React.Component<IAppProps & IMapDispatchToProps> {
     );
   }
 }
-
-export const mapStateToProps = (state: IAppState, ownprops: any): IAppProps => {
-  return {
-    isAuthenticated: state.authentication.isLogged,
-    user: state.authentication.user
-  };
-};
-
-interface IMapDispatchToProps {
-  getUserInfo: () => void;
-}
-export const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, any>,
-  ownprops: any
-): IMapDispatchToProps => {
-  return {
-    getUserInfo: () => dispatch(getCurrentUserInfo)
-  };
-};
 
 export default connect(
   mapStateToProps,

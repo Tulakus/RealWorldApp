@@ -4,7 +4,6 @@ import {
   getArticleFeedList,
   getArticleList,
   getTagList,
-  IFavoriteRequest,
   unfavoriteArticle
 } from "../helpers/apiHelper";
 import { IArticle } from "../interfaces/IArticle";
@@ -30,8 +29,8 @@ export interface IMapDispatchToProps {
   getArticleList: (offset: number) => void;
   getArticleListWithTag: (offset: number, tag: string) => void;
   getTags: () => void;
-  favorite: (data: IFavoriteRequest) => void;
-  unfavorite: (data: IFavoriteRequest) => void;
+  favoriteArticle: (articleSlug: string) => void;
+  unfavoriteArticle: (articleSlug: string) => void;
 }
 
 export interface IMapStateToProps {
@@ -66,7 +65,8 @@ export const mapDispatchToProps = (
   dispatch: ThunkDispatch<{}, {}, any>
 ): IMapDispatchToProps => {
   return {
-    favorite: (data: IFavoriteRequest) => dispatch(favoriteArticle(data)),
+    favoriteArticle: (articleSlug: string) =>
+      dispatch(favoriteArticle(articleSlug)),
     getArticleFeedList: (offset: number) => {
       dispatch(
         getArticleFeedList({
@@ -95,7 +95,8 @@ export const mapDispatchToProps = (
     getTags: () => {
       dispatch(getTagList());
     },
-    unfavorite: (data: IFavoriteRequest) => dispatch(unfavoriteArticle(data))
+    unfavoriteArticle: (articleSlug: string) =>
+      dispatch(unfavoriteArticle(articleSlug))
   };
 };
 

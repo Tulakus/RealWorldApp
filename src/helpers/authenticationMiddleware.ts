@@ -3,6 +3,7 @@ import {
   LOGOUT_SUCCES,
   REGISTRATION_SUCCESS
 } from "../reducers/authentication";
+import agentWrapper from "./agentWrapper";
 export const TOKEN = "jwt";
 
 export default (store: any) => (next: any) => (action: any) => {
@@ -10,8 +11,10 @@ export default (store: any) => (next: any) => (action: any) => {
     const userInfo = JSON.parse(action.payload).user;
     const jwtToken = userInfo.token;
     localStorage.setItem(TOKEN, jwtToken);
+    agentWrapper.Token = jwtToken;
   } else if (action.type === LOGOUT_SUCCES) {
     localStorage.removeItem(TOKEN);
+    agentWrapper.Token = "";
   }
   next(action);
 };

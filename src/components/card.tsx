@@ -1,3 +1,4 @@
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 
 export interface IProps {
@@ -7,28 +8,68 @@ export interface IProps {
   name?: string;
   date?: string;
   comment?: string;
+  id?: number;
+  slug: string;
+  addComment?: (comment: string, slug: string) => void;
+  deleteComment?: (id: number, slug: string) => void;
 }
 
-export class Card extends React.Component<IProps, {}> {
+interface IState {
+  comment: string;
+  isEditing: boolean;
+}
+export class Card extends React.Component<IProps, IState> {
+  public readonly state: IState = {
+    comment: this.props.comment || "",
+    isEditing: !!this.props.isEditing
+  };
+
+  @boundMethod
+  public changeComment(comment: string) {
+    this.setState({
+      comment
+    });
+  }
+
+  @boundMethod
+  public addComment(e: any) {
+    e.preventDefault();
+    this.changeComment("");
+    this.props.addComment!(this.state.comment, this.props.slug);
+  }
+
+  @boundMethod
+  public deleteComment(e: any) {
+    e.preventDefault();
+    this.props.deleteComment!(this.props.id!, this.props.slug);
+  }
+
   public render() {
     const card = (
       <div className="card">
-        {this.props.isEditing === true ? (
+        {this.state.isEditing ? (
           <form className="card comment-form">
             <div className="card-block">
               <textarea
                 className="form-control"
                 placeholder="Write a comment..."
                 rows={3}
+                onChange={e => this.changeComment(e.target.value)}
+                value={this.state.comment}
               />
             </div>
             <div className="card-footer">
               <img src={this.props.img} className="comment-author-img" />
-              <button className="btn btn-sm btn-primary">Post Comment</button>
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={e => this.addComment(e)}
+              >
+                Post Comment
+              </button>
             </div>
           </form>
         ) : (
-          <div>
+          <div key={this.props.id}>
             <div className="card-block">
               <p className="card-text">{this.props.comment}</p>
             </div>
@@ -43,8 +84,10 @@ export class Card extends React.Component<IProps, {}> {
               <span className="date-posted">{this.props.date}</span>
               {this.props.isAuthor !== undefined && this.props.isAuthor && (
                 <span className="mod-options">
-                  <i className="ion-edit" />
-                  <i className="ion-trash-a" />
+                  <i
+                    className="ion-trash-a"
+                    onClick={e => this.deleteComment(e)}
+                  />
                 </span>
               )}
             </div>

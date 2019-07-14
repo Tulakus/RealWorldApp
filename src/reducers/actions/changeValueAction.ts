@@ -1,15 +1,17 @@
-export const CHANGE_VALUE = "CHANGE_VALUE";
-
-export interface IChangeValueAction {
-  type: typeof CHANGE_VALUE;
+export interface IChangeValueAction<T> {
+  type: T;
   value: string;
   key: string;
 }
 
-export function changeValue(key: string, value: string): IChangeValueAction {
+export function changeValue<T>(
+  key: string,
+  value: string,
+  type: T
+): IChangeValueAction<T> {
   return {
     key,
-    type: CHANGE_VALUE,
+    type,
     value
   };
 }

@@ -4,10 +4,10 @@ export const ERROR = "ERROR";
 export const CLEAN_ERRORS = "CLEAN_ERRORS";
 
 export interface IErrorState {
-  fetchError: IError | undefined;
+  errors: IError | undefined;
 }
 const initialState: IErrorState = {
-  fetchError: {}
+  errors: {}
 };
 
 interface IErrorAction {
@@ -32,10 +32,10 @@ export function errorHandlingReducer(
   switch (action.type) {
     case ERROR:
       return Object.assign({}, state, {
-        fetchError: action.payload
+        errors: action.payload
       });
     case CLEAN_ERRORS:
-      return state.fetchError === undefined
+      return state.errors === undefined
         ? state
         : Object.assign({}, state, {
             fetchError: undefined

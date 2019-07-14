@@ -1,5 +1,10 @@
 import {
+  ARTICLE_ADDED_SUCCESS,
+  ARTICLE_CHANGED_SUCCESS,
+  ARTICLE_COMMENTS_ADD_SUCCESS,
+  ARTICLE_COMMENTS_DELETED_SUCCESS,
   ARTICLE_COMMENTS_FETCH_SUCCESS,
+  ARTICLE_DELETED_SUCCESS,
   ARTICLE_FEED_LIST_FETCH_SUCCESS,
   ARTICLE_FETCH_SUCCESS,
   ARTICLE_LIST_FETCH_SUCCESS,
@@ -42,14 +47,8 @@ export const getArticleList = (data: IArticleListQuery) =>
     data
   );
 
-// tslint:disable-next-line:no-empty-interface
-interface ITagsQuery {}
-
 export const getTagList = () =>
-  F.get<ITagsQuery>(
-    "https://conduit.productionready.io/api/tags",
-    TAGS_FETCH_SUCCESS
-  );
+  F.get("https://conduit.productionready.io/api/tags", TAGS_FETCH_SUCCESS);
 
 export interface ILoginRequest {
   user: { email: string; password: string };
@@ -66,9 +65,9 @@ export interface IProfileQuery {
   user: string;
 }
 
-export const getProfile = (data: IProfileQuery) =>
+export const getProfile = (username: string) =>
   F.get(
-    `https://conduit.productionready.io/api/profiles/${data.user}`,
+    `https://conduit.productionready.io/api/profiles/${username}`,
     PROFILE_FETCH_SUCCESS
   );
 
@@ -76,15 +75,15 @@ export interface IFollowRequest {
   username: string;
 }
 
-export const followUser = (data: IFollowRequest) =>
+export const followAuthor = (username: string) =>
   F.post(
-    `https://conduit.productionready.io/api/profiles/${data.username}/follow`,
+    `https://conduit.productionready.io/api/profiles/${username}/follow`,
     FOLLOW_SUCCESS
   );
 
-export const unfollowUser = (data: IFollowRequest) =>
+export const unfollowAuthor = (username: string) =>
   F.del(
-    `https://conduit.productionready.io/api/profiles/${data.username}/follow`,
+    `https://conduit.productionready.io/api/profiles/${username}/follow`,
     UNFOLLOW_SUCCESS
   );
 
@@ -113,7 +112,7 @@ export interface ISettingsRequest {
 export interface IUserInfoRequest {}
 
 export const getCurrentUserInfo = () =>
-  F.get<IUserInfoRequest>(
+  F.get(
     "https://conduit.productionready.io/api/user",
     USER_INFO_FETCHED_SUCCESSFULLY
   );
@@ -125,19 +124,15 @@ export const updateUserSettings = (data: ISettingsRequest) =>
     data
   );
 
-export interface IFavoriteRequest {
-  slug: string;
-}
-
-export const favoriteArticle = (data: IFavoriteRequest) =>
-  F.post<IFavoriteRequest>(
-    `https://conduit.productionready.io/api/articles/${data.slug}/favorite`,
+export const favoriteArticle = (articleSlug: string) =>
+  F.post(
+    `https://conduit.productionready.io/api/articles/${articleSlug}/favorite`,
     FAVORITE_ARTICLE_SUCCESS
   );
 
-export const unfavoriteArticle = (data: IFavoriteRequest) =>
-  F.del<IFavoriteRequest>(
-    `https://conduit.productionready.io/api/articles/${data.slug}/favorite`,
+export const unfavoriteArticle = (articleSlug: string) =>
+  F.del(
+    `https://conduit.productionready.io/api/articles/${articleSlug}/favorite`,
     UNFAVORITE_ARTICLE_SUCCESS
   );
 
@@ -146,7 +141,7 @@ export interface IArticleQuery {
 }
 
 export const getArticle = (data: IArticleQuery) =>
-  F.get<IArticleQuery>(
+  F.get(
     `https://conduit.productionready.io/api/articles/${data.slug}`,
     ARTICLE_FETCH_SUCCESS
   );
@@ -156,7 +151,64 @@ export interface IArticleCommentsQuery {
 }
 
 export const getArticleComments = (data: IArticleCommentsQuery) =>
-  F.get<IArticleCommentsQuery>(
+  F.get(
     `https://conduit.productionready.io/api/articles/${data.slug}/comments`,
     ARTICLE_COMMENTS_FETCH_SUCCESS
+  );
+
+export interface IArticleCommentRequest {
+  comment: {
+    body: string;
+  };
+}
+
+export const addArticleComment = (data: IArticleCommentRequest, slug: string) =>
+  F.post<IArticleCommentRequest>(
+    `https://conduit.productionready.io/api/articles/${slug}/comments`,
+    ARTICLE_COMMENTS_ADD_SUCCESS,
+    data
+  );
+
+export const deleteArticleComment = (id: number, slug: string) =>
+  F.del(
+    `https://conduit.productionready.io/api/articles/${slug}/comments/${id}`,
+    ARTICLE_COMMENTS_DELETED_SUCCESS
+  );
+
+export interface IAddArticleRequest {
+  article: {
+    title: string;
+    description: string;
+    body: string;
+    tagList?: string[];
+  };
+}
+
+export const addArticle = (data: IAddArticleRequest) =>
+  F.post(
+    `https://conduit.productionready.io/api/articles`,
+    ARTICLE_ADDED_SUCCESS,
+    data
+  );
+
+export interface IEditArticleRequest {
+  article: {
+    title?: string;
+    description?: string;
+    body?: string;
+    tagList?: string[];
+  };
+}
+
+export const editArticle = (data: IEditArticleRequest, slug: string) =>
+  F.post(
+    `https://conduit.productionready.io/api/articles/${slug}`,
+    ARTICLE_CHANGED_SUCCESS,
+    data
+  );
+
+export const deleteArticle = (slug: string) =>
+  F.del(
+    `https://conduit.productionready.io/api/articles/${slug}`,
+    ARTICLE_DELETED_SUCCESS
   );

@@ -7,8 +7,10 @@ class AgentWrapper {
   // tslint:disable-next-line:variable-name
   private _token: string = "";
   set Token(token: string) {
+    console.log("token: " + token);
     this._token = token;
   }
+
   public post<TRequestData extends object>(
     url: string,
     actionType: string,
@@ -16,6 +18,7 @@ class AgentWrapper {
   ): any {
     return this.sendRequest(request.post(url).send(data), actionType);
   }
+
   public get<TQueryData extends object>(
     url: string,
     actionType: string,
@@ -56,6 +59,8 @@ class AgentWrapper {
             return Promise.resolve(response.body);
           },
           error => {
+            // tslint:disable-next-line:no-debugger
+            debugger;
             dispatch(this.onFetchError(error.response));
             dispatch(fetchingFinished);
             return Promise.reject(error.response);
@@ -73,9 +78,19 @@ class AgentWrapper {
 
   private onFetchError(err: request.Response) {
     return {
-      payload: err.body.errors,
+      payload: this.transformErrors(err),
       type: ERROR
     };
+  }
+
+  private transformErrors(response: request.Response) {
+    console.log(response);
+
+    if (!!response.body && response.body.hasOwnProperty("errors")) {
+      return response.body.errors;
+    } else {
+      return response.error;
+    }
   }
 }
 

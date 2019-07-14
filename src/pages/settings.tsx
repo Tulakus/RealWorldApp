@@ -1,4 +1,4 @@
-import autobind from "autobind-decorator";
+import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { ISettingsRequest } from "../helpers/apiHelper";
@@ -24,12 +24,13 @@ class Settings extends React.Component<ISettingsProps, IState> {
     password: undefined,
     username: this.props.username
   };
-  @autobind
+
+  @boundMethod
   public handleChange(e: any, id: string) {
     this.setState({ [id]: e.target.value });
   }
 
-  @autobind
+  @boundMethod
   public updateSettings(e: any) {
     e.preventDefault();
     const settings: ISettingsRequest = {
@@ -46,6 +47,10 @@ class Settings extends React.Component<ISettingsProps, IState> {
     this.props.updateSettings(settings);
   }
 
+  @boundMethod
+  public logout() {
+    this.props.logout();
+  }
   public render() {
     return (
       <div className="settings-page">
@@ -104,6 +109,17 @@ class Settings extends React.Component<ISettingsProps, IState> {
                   </button>
                 </fieldset>
               </form>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-6 offset-md-3 col-xs-12">
+              <hr />
+              <button
+                className="btn btn-lg btn-outline-danger pull-xs-left"
+                onClick={e => this.logout()}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>

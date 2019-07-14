@@ -1,14 +1,13 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { IFavoriteRequest } from "../helpers/apiHelper";
 import { getDate } from "../helpers/helper";
 import { IArticle } from "../interfaces/IArticle";
 import { IAuthor } from "../interfaces/IAuthor";
 
 export interface IProps {
   article: IArticle;
-  favorite: (data: IFavoriteRequest) => void;
-  unfavorite: (data: IFavoriteRequest) => void;
+  favoriteArticle: (articleSlug: string) => void;
+  unfavoriteArticle: (articleSlug: string) => void;
 }
 
 export class ArticlePreview extends React.Component<IProps, {}> {
@@ -31,8 +30,8 @@ export class ArticlePreview extends React.Component<IProps, {}> {
             className="btn btn-outline-primary btn-sm pull-xs-right"
             onClick={e =>
               article.favorited
-                ? this.props.unfavorite({ slug: article.slug })
-                : this.props.favorite({ slug: article.slug })
+                ? this.props.unfavoriteArticle(article.slug)
+                : this.props.favoriteArticle(article.slug)
             }
           >
             <i className="ion-heart" /> {article.favoritesCount}
@@ -45,7 +44,9 @@ export class ArticlePreview extends React.Component<IProps, {}> {
           <ul className="tag-list">
             {!!article.tagList &&
               article.tagList.map(i => (
-                <li className="tag-default tag-pill tag-outline">{i}</li>
+                <li key={i} className="tag-default tag-pill tag-outline">
+                  {i}
+                </li>
               ))}
           </ul>
         </Link>

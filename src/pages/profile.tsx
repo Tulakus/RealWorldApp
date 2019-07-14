@@ -25,7 +25,7 @@ interface IState {
 
 class Profile extends React.Component<IProps & IProfileProps, IState> {
   public readonly state: IState = {
-    page: 1,
+    page: 0,
     username: this.props.match.params.username
   };
   public componentDidMount() {
@@ -42,11 +42,11 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
 
   @boundMethod
   public follow(userName: string) {
-    this.props.follow(userName);
+    this.props.followAuthor(userName);
   }
   @boundMethod
   public unfollow(userName: string) {
-    this.props.unfollow(userName);
+    this.props.unfollowAuthor(userName);
   }
   public render() {
     const articles = this.props.articles;
@@ -129,8 +129,8 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
                 articles.map((article: IArticle) => (
                   <ArticlePreview
                     article={article}
-                    favorite={this.props.favorite}
-                    unfavorite={this.props.unfavorite}
+                    favoriteArticle={this.props.favoriteAuthor}
+                    unfavoriteArticle={this.props.unfavoriteArticle}
                   />
                 ))}
 

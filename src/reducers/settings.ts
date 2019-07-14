@@ -1,8 +1,9 @@
 import { ThunkDispatch } from "redux-thunk";
 import { ISettingsRequest, updateUserSettings } from "../helpers/apiHelper";
-import { navigateOnFetchSuccess } from "../helpers/helper";
+import { navigate, navigateOnSuccess } from "../helpers/helper";
 import { IError } from "../interfaces/IError";
 import { IAppState } from "../store/rootReducer";
+import { LOGOUT_SUCCES } from "./authentication";
 
 export interface IMapStateToProps {
   password?: string;
@@ -13,7 +14,10 @@ export interface IMapStateToProps {
 }
 
 export const mapStateToProps = (state: IAppState) => {
-  const user = state.authentication.user!;
+  const user = state.authentication.user;
+  if (user === undefined) {
+    return;
+  }
   return {
     bio: user.bio,
     email: user.email,
@@ -25,6 +29,7 @@ export const mapStateToProps = (state: IAppState) => {
 
 export interface IMapDispatchToProps {
   updateSettings: (data: ISettingsRequest) => void;
+  logout: () => void;
 }
 
 export const mapDispatchToProps = (
@@ -32,10 +37,14 @@ export const mapDispatchToProps = (
   ownProps: any
 ): IMapDispatchToProps => {
   return {
+    logout: async () => {
+      await dispatch({
+        type: LOGOUT_SUCCES
+      });
+      navigate(ownProps, "/");
+    },
     updateSettings: (data: ISettingsRequest) =>
-      dispatch(
-        navigateOnFetchSuccess(() => updateUserSettings(data), ownProps, "/")
-      )
+      dispatch(navigateOnSuccess(() => updateUserSettings(data), ownProps, "/"))
   };
 };
 

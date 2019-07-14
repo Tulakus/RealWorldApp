@@ -5,7 +5,6 @@ import { ArticlePreview } from "../components/article-preview";
 import { Pagination } from "../components/pagination";
 import { Sidebar } from "../components/sidebar";
 import { TagsList } from "../components/tag-list";
-import { IFavoriteRequest, unfavoriteArticle } from "../helpers/apiHelper";
 import { IArticle } from "../interfaces/IArticle";
 import {
   IHomeProps,
@@ -19,8 +18,8 @@ interface IArticleList {
   itemsPerPage?: number;
   selectedPage: number;
   handlePaginationClick: (index: number) => void;
-  favorite: (data: IFavoriteRequest) => void;
-  unfavorite: (data: IFavoriteRequest) => void;
+  favoriteArticle: (articleSlug: string) => void;
+  unfavoriteArticle: (articleSlug: string) => void;
 }
 
 const ArticleList = (props: IArticleList) => {
@@ -31,9 +30,10 @@ const ArticleList = (props: IArticleList) => {
       ) : (
         props.articles.map((i: IArticle) => (
           <ArticlePreview
+            key={i.slug}
             article={i}
-            favorite={props.favorite}
-            unfavorite={props.unfavorite}
+            favoriteArticle={props.favoriteArticle}
+            unfavoriteArticle={props.unfavoriteArticle}
           />
         ))
       )}
@@ -64,7 +64,7 @@ class Home extends React.Component<IHomeProps, IHomeState> {
     feed: this.props.isAuthenticated
       ? SelectedFeed.Personal
       : SelectedFeed.Global,
-    page: 1,
+    page: 0,
     tag: ""
   };
 
@@ -73,6 +73,7 @@ class Home extends React.Component<IHomeProps, IHomeState> {
     this.props.getTags();
   }
 
+  @boundMethod
   public handleFeedChange(
     feed: SelectedFeed,
     e: React.MouseEvent<HTMLElement>
@@ -80,17 +81,17 @@ class Home extends React.Component<IHomeProps, IHomeState> {
     e.preventDefault();
     this.setState({
       feed,
-      page: 1,
+      page: 0,
       tag: ""
     });
-    this.getItems(1, feed);
+    this.getItems(0, feed);
   }
 
   @boundMethod
   public handleTagClick(tag: string) {
     this.setState({
       feed: SelectedFeed.Tag,
-      page: 1,
+      page: 0,
       tag
     });
     this.props.getArticleListWithTag(0, tag);
@@ -193,8 +194,8 @@ class Home extends React.Component<IHomeProps, IHomeState> {
                   });
                   this.getItems(i, this.state.feed);
                 }}
-                favorite={this.props.favorite}
-                unfavorite={this.props.unfavorite}
+                favoriteArticle={this.props.favoriteArticle}
+                unfavoriteArticle={this.props.unfavoriteArticle}
               />
             </div>
             <div className="col-md-3">

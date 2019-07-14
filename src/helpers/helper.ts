@@ -9,7 +9,7 @@ export function getDate(date: string): string {
   return `${a}th`;
 }
 
-export function navigateOnFetchSuccess(
+export function navigateOnSuccess(
   fetchRequest: () => any,
   props: any,
   redirectTo: string
@@ -23,4 +23,8 @@ export function navigateOnFetchSuccess(
       () => {}
     );
   };
+}
+
+export function navigate(props: any, redirectTo: string) {
+  props.history.push(redirectTo);
 }

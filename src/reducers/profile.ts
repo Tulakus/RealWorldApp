@@ -1,13 +1,12 @@
 import { ThunkDispatch } from "redux-thunk";
 import {
   favoriteArticle,
-  followUser,
+  followAuthor,
   getArticleList,
   getProfile,
   IArticleListQuery,
-  IFavoriteRequest,
   unfavoriteArticle,
-  unfollowUser
+  unfollowAuthor
 } from "../helpers/apiHelper";
 import { IArticle } from "../interfaces/IArticle";
 import { IError } from "../interfaces/IError";
@@ -23,10 +22,10 @@ export interface IMapDispatchToProps {
   getProfile: (profile: string) => void;
   getAuthorArticles: (offset: number, author: string) => void;
   getFavoritedArticles: (offset: number, favorited: string) => void;
-  follow: (usrename: string) => void;
-  unfollow: (usrename: string) => void;
-  favorite: (data: IFavoriteRequest) => void;
-  unfavorite: (data: IFavoriteRequest) => void;
+  followAuthor: (username: string) => void;
+  unfollowAuthor: (username: string) => void;
+  favoriteAuthor: (articleSlug: string) => void;
+  unfavoriteArticle: (articleSlug: string) => void;
 }
 
 export interface IMapStateToProps {
@@ -75,6 +74,7 @@ export function profileReducer(
     case UNFOLLOW_SUCCESS:
     case FOLLOW_SUCCESS:
     case PROFILE_FETCH_SUCCESS:
+      console.log(action.payload);
       return Object.assign({}, state, {
         profile: JSON.parse(action.payload).profile
       });
@@ -88,8 +88,9 @@ export const mapDispatchToProps = (
   dispatch: ThunkDispatch<{}, {}, any>
 ): IMapDispatchToProps => {
   return {
-    favorite: (data: IFavoriteRequest) => dispatch(favoriteArticle(data)),
-    follow: (username: string) => dispatch(followUser({ username })),
+    favoriteAuthor: (articleSlug: string) =>
+      dispatch(favoriteArticle(articleSlug)),
+    followAuthor: (username: string) => dispatch(followAuthor(username)),
     getArticles: (data: IArticleListQuery) => dispatch(getArticleList(data)),
     getAuthorArticles: (offset: number, author: string) =>
       dispatch(
@@ -107,9 +108,10 @@ export const mapDispatchToProps = (
           offset: offset * 10
         })
       ),
-    getProfile: (profile: string) => dispatch(getProfile({ user: profile })),
-    unfavorite: (data: IFavoriteRequest) => dispatch(unfavoriteArticle(data)),
-    unfollow: (username: string) => dispatch(unfollowUser({ username }))
+    getProfile: (profile: string) => dispatch(getProfile(profile)),
+    unfavoriteArticle: (articleSlug: string) =>
+      dispatch(unfavoriteArticle(articleSlug)),
+    unfollowAuthor: (username: string) => dispatch(unfollowAuthor(username))
   };
 };
 

@@ -1,6 +1,6 @@
 import { ThunkDispatch } from "redux-thunk";
 import { IRegistrationRequest, registerUser } from "../helpers/apiHelper";
-import { navigateOnFetchSuccess } from "../helpers/helper";
+import { navigateOnSuccess } from "../helpers/helper";
 import { IError } from "../interfaces/IError";
 import { IUser } from "../interfaces/IUser";
 import { IAppState } from "../store/rootReducer";
@@ -31,7 +31,7 @@ export interface IMapStateToProps {
   errors: IError | undefined;
 }
 
-export type RegistrationActionTypes = IChangeValueAction | IFetchedDataAction;
+export type RegistrationActionTypes = IFetchedDataAction; // IChangeValueAction |
 
 const initialState: IRegistrationState = {};
 
@@ -55,13 +55,13 @@ export const mapDispatchToProps = (
 ): IMapDispatchToProps => {
   return {
     registration: (data: IRegistrationRequest) =>
-      dispatch(navigateOnFetchSuccess(() => registerUser(data), ownprops, "/"))
+      dispatch(navigateOnSuccess(() => registerUser(data), ownprops, "/"))
   };
 };
 
 export const mapStateToProps = (state: IAppState): IMapStateToProps => {
   return {
-    errors: state.error.fetchError
+    errors: state.error.errors
   };
 };
 

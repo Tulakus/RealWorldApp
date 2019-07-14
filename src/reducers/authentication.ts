@@ -26,8 +26,13 @@ interface ILogoutAction {
   payload: string;
 }
 
-export interface ISettingChangedAction {
+interface ISettingChangedAction {
   type: typeof USER_INFO_CHANGED_SUCCESSFULLY;
+  payload: string;
+}
+
+interface ISettingFetchedAction {
+  type: typeof USER_INFO_FETCHED_SUCCESSFULLY;
   payload: string;
 }
 
@@ -35,7 +40,8 @@ export type AuthenticationActionTypes =
   | ILoginDataAction
   | IRegisterDataAction
   | ILogoutAction
-  | ISettingChangedAction;
+  | ISettingChangedAction
+  | ISettingFetchedAction;
 
 const initialState: IAuthenticationState = {
   isLogged: false,
@@ -47,6 +53,7 @@ export function authenticationReducer(
   action: AuthenticationActionTypes
 ): IAuthenticationState {
   switch (action.type) {
+    case USER_INFO_FETCHED_SUCCESSFULLY:
     case LOGIN_SUCCESS:
     case REGISTRATION_SUCCESS:
       const userInfo: IUser = JSON.parse(action.payload).user;
@@ -54,12 +61,13 @@ export function authenticationReducer(
         isLogged: true,
         user: userInfo
       });
-    case LOGOUT_SUCCES:
     case USER_INFO_CHANGED_SUCCESSFULLY:
       return Object.assign({}, state, {
         isLogged: true,
         user: JSON.parse(action.payload).user
       });
+    case LOGOUT_SUCCES:
+      return { ...state, isLogged: false, user: undefined };
     default:
       return state;
   }
