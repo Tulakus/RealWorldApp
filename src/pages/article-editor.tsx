@@ -1,25 +1,74 @@
 import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
+import { RouteComponentProps } from "react-router-dom";
 import { ErrorList } from "../components/error-list";
 import {
-  IProps,
+  IArticleEditorProps,
   mapDispatchToProps,
   mapStateToProps
 } from "../reducers/article-editor";
 
+interface IMatchParams {
+  slug: string;
+}
+
+interface IProps
+  extends RouteComponentProps<IMatchParams>,
+    IArticleEditorProps {}
+
 class ArticleEditor extends React.Component<IProps> {
+  public constructor(props: IProps) {
+    super(props);
+    const slug: string = this.props.match.params.slug;
+    if (!!slug) {
+      this.getArticleEdt(slug);
+    }
+  }
+
   @boundMethod
-  public onValueChange(e: any, key: string) {
+  public onValueChange(e: any, key: string): void {
     this.props.onValueChange(key, e.target.value);
+  }
+  @boundMethod
+  public editSubmit(): void {
+    this.props.editSubmit(
+      {
+        article: {
+          body: this.props.content,
+          description: this.props.about,
+          tagList: this.props.tagList,
+          title: this.props.title
+        }
+      },
+      this.props.match.params.slug
+    );
+  }
+  @boundMethod
+  public addSubmit(): void {
+    this.props.addSubmit({
+      article: {
+        body: this.props.content,
+        description: this.props.about,
+        tagList: this.props.tagList,
+        title: this.props.title
+      }
+    });
+  }
+  @boundMethod
+  public getArticleEdt(slug: string) {
+    this.props.getArticle(slug);
+  }
+  public componentWillUnmount() {
+    this.props.onDestroy();
   }
   public render() {
     return (
       <div className="editor-page">
         <div className="container page">
-          <ErrorList errors={this.props.errors} />
           <div className="row">
             <div className="col-md-10 offset-md-1 col-xs-12">
+              <ErrorList errors={this.props.errors} />
               <form>
                 <fieldset>
                   <fieldset className="form-group">
@@ -56,7 +105,6 @@ class ArticleEditor extends React.Component<IProps> {
                       placeholder="Enter tags"
                       onChange={e => this.onValueChange(e, "tag")}
                       value={this.props.tag}
-                      // tslint:disable-next-line:no-debugger
                       onKeyPress={e => {
                         if (e.key === "Enter") {
                           this.props.onTagAdd(this.props.tag);
@@ -69,14 +117,7 @@ class ArticleEditor extends React.Component<IProps> {
                     className="btn btn-lg pull-xs-right btn-primary"
                     type="button"
                     onClick={() =>
-                      this.props.submit({
-                        article: {
-                          body: this.props.content,
-                          description: this.props.about,
-                          tagList: this.props.tagList,
-                          title: this.props.title
-                        }
-                      })
+                      this.props.editing ? this.editSubmit() : this.addSubmit()
                     }
                   >
                     Publish Article

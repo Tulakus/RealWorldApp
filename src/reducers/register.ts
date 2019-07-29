@@ -4,7 +4,7 @@ import { navigateOnSuccess } from "../helpers/helper";
 import { IError } from "../interfaces/IError";
 import { IUser } from "../interfaces/IUser";
 import { IAppState } from "../store/rootReducer";
-import { IChangeValueAction } from "./actions/changeValueAction";
+import { cleanErrors } from "./errorHandler";
 
 export const REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS";
 
@@ -25,6 +25,7 @@ export function registrationSuccess(user: IUser): IFetchedDataAction {
 
 export interface IMapDispatchToProps {
   registration: (data: IRegistrationRequest) => void;
+  clean: () => void;
 }
 
 export interface IMapStateToProps {
@@ -54,6 +55,7 @@ export const mapDispatchToProps = (
   ownprops: any
 ): IMapDispatchToProps => {
   return {
+    clean: () => dispatch(cleanErrors()),
     registration: (data: IRegistrationRequest) =>
       dispatch(navigateOnSuccess(() => registerUser(data), ownprops, "/"))
   };

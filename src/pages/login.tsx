@@ -16,8 +16,8 @@ interface ILoginState {
 
 class Login extends React.Component<ILoginProps, {}> {
   public readonly state: ILoginState = {
-    email: "tulakuss@realworld.com",
-    password: "Password*"
+    email: "",
+    password: ""
   };
   @boundMethod
   public handleChange(e: any, key: string) {
@@ -29,6 +29,12 @@ class Login extends React.Component<ILoginProps, {}> {
     this.props.login({
       user: { email: this.state.email, password: this.state.password }
     });
+  }
+  public componentWillUnmount() {
+    if (this.props.errors === undefined) {
+      return;
+    }
+    this.props.clean();
   }
   public render() {
     return (

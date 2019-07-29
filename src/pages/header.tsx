@@ -21,11 +21,13 @@ class Header extends React.Component<IHeaderProps> {
                   &nbsp;Home
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link to={"/editor"} className="nav-link">
-                  &nbsp;New Post
-                </Link>
-              </li>
+              {this.props.isAuthenticated && (
+                <li className="nav-item">
+                  <Link to={"/editor"} className="nav-link">
+                    &nbsp;New Post
+                  </Link>
+                </li>
+              )}
               {this.props.isAuthenticated && (
                 <li className="nav-item">
                   <Link to={"/settings"} className="nav-link">

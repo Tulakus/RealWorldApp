@@ -7,7 +7,6 @@ class AgentWrapper {
   // tslint:disable-next-line:variable-name
   private _token: string = "";
   set Token(token: string) {
-    console.log("token: " + token);
     this._token = token;
   }
 
@@ -47,7 +46,7 @@ class AgentWrapper {
     actionType: string
   ): any {
     return (dispatch: ThunkDispatch<{}, {}, any>) => {
-      dispatch(fetchingStarted());
+      dispatch(fetchingStarted(actionType));
       dispatch(cleanErrors());
 
       return agentRequest
@@ -55,14 +54,12 @@ class AgentWrapper {
         .then(
           response => {
             dispatch(this.onFetchSuccess(actionType, response.body));
-            dispatch(fetchingFinished);
+            dispatch(fetchingFinished(actionType));
             return Promise.resolve(response.body);
           },
           error => {
-            // tslint:disable-next-line:no-debugger
-            debugger;
             dispatch(this.onFetchError(error.response));
-            dispatch(fetchingFinished);
+            dispatch(fetchingFinished(actionType));
             return Promise.reject(error.response);
           }
         );
@@ -84,8 +81,6 @@ class AgentWrapper {
   }
 
   private transformErrors(response: request.Response) {
-    console.log(response);
-
     if (!!response.body && response.body.hasOwnProperty("errors")) {
       return response.body.errors;
     } else {

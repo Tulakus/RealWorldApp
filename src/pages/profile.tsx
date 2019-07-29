@@ -2,9 +2,9 @@ import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Link, RouteComponentProps } from "react-router-dom";
-import { ArticlePreview } from "../components/article-preview";
-import { Pagination } from "../components/pagination";
-import { IArticle } from "../interfaces/IArticle";
+import { ArticleList } from "../components/article-list";
+import { ARTICLE_LIST_FETCH_SUCCESS } from "../reducers/article";
+import { IsLoadingInProgress } from "../reducers/loader";
 import {
   IProfileProps,
   mapDispatchToProps,
@@ -49,7 +49,6 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
     this.props.unfollowAuthor(userName);
   }
   public render() {
-    const articles = this.props.articles;
     const profile = this.props.profile;
     const showFavorited: boolean = this.showFavorited();
     const onClickAction = showFavorited
@@ -124,25 +123,22 @@ class Profile extends React.Component<IProps & IProfileProps, IState> {
                   </li>
                 </ul>
               </div>
-
-              {!!articles &&
-                articles.map((article: IArticle) => (
-                  <ArticlePreview
-                    article={article}
-                    favoriteArticle={this.props.favoriteAuthor}
-                    unfavoriteArticle={this.props.unfavoriteArticle}
-                  />
-                ))}
-
-              <Pagination
-                items={this.props.articlesCount.count}
-                handleClick={(i: number) => {
+              <ArticleList
+                loading={IsLoadingInProgress(
+                  this.props.loadingActions,
+                  ARTICLE_LIST_FETCH_SUCCESS
+                )}
+                articles={this.props.articles}
+                articlesCount={this.props.articlesCount}
+                selectedPage={this.state.page}
+                handlePaginationClick={(i: number) => {
                   this.setState({
                     page: i
                   });
                   onClickAction(i, this.state.username);
                 }}
-                selectedPage={this.state.page}
+                favoriteArticle={this.props.favoriteAuthor}
+                unfavoriteArticle={this.props.unfavoriteArticle}
               />
             </div>
           </div>

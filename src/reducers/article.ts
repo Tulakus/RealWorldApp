@@ -53,7 +53,7 @@ export interface IMapStateToProps {
   articleComments: IComment[];
   article: IArticle;
   isLogged: boolean;
-  user?: IUser;
+  currentUser?: IUser;
 }
 
 export interface IArticleState {
@@ -182,8 +182,8 @@ export const mapStateToProps = (
     articleComments: state.article.articleComments,
     articles: state.article.articles,
     articlesCount: state.article.articlesCount,
-    isLogged: state.authentication.isLogged,
-    user: state.authentication.user
+    currentUser: state.authentication.user,
+    isLogged: state.authentication.isLogged
   };
 };
 

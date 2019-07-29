@@ -32,6 +32,7 @@ export interface IMapStateToProps {
   articles: IArticle[];
   articlesCount: { count: number };
   profile: IProfile;
+  loadingActions: string[];
 }
 
 export interface IProfileState {
@@ -74,7 +75,6 @@ export function profileReducer(
     case UNFOLLOW_SUCCESS:
     case FOLLOW_SUCCESS:
     case PROFILE_FETCH_SUCCESS:
-      console.log(action.payload);
       return Object.assign({}, state, {
         profile: JSON.parse(action.payload).profile
       });
@@ -119,6 +119,7 @@ export const mapStateToProps = (state: IAppState): IMapStateToProps => {
   return {
     articles: state.article.articles,
     articlesCount: state.article.articlesCount,
+    loadingActions: state.loader.loadingActions,
     profile: state.profile.profile
   };
 };

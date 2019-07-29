@@ -1,51 +1,20 @@
 import { boundMethod } from "autobind-decorator";
 import * as React from "react";
 import { connect } from "react-redux";
-import { ArticlePreview } from "../components/article-preview";
-import { Pagination } from "../components/pagination";
+import { ArticleList } from "../components/article-list";
 import { Sidebar } from "../components/sidebar";
 import { TagsList } from "../components/tag-list";
-import { IArticle } from "../interfaces/IArticle";
+import {
+  ARTICLE_FEED_LIST_FETCH_SUCCESS,
+  ARTICLE_LIST_FETCH_SUCCESS
+} from "../reducers/article";
+import { IsLoadingInProgress } from "../reducers/loader";
 import {
   IHomeProps,
   mapDispatchToProps,
-  mapStateToProps
+  mapStateToProps,
+  TAGS_FETCH_SUCCESS
 } from "./../reducers/home";
-
-interface IArticleList {
-  articles: IArticle[];
-  articlesCount: { count: number };
-  itemsPerPage?: number;
-  selectedPage: number;
-  handlePaginationClick: (index: number) => void;
-  favoriteArticle: (articleSlug: string) => void;
-  unfavoriteArticle: (articleSlug: string) => void;
-}
-
-const ArticleList = (props: IArticleList) => {
-  return (
-    <div>
-      {props.articles.length === 0 ? (
-        <div>No articles are here... yet.</div>
-      ) : (
-        props.articles.map((i: IArticle) => (
-          <ArticlePreview
-            key={i.slug}
-            article={i}
-            favoriteArticle={props.favoriteArticle}
-            unfavoriteArticle={props.unfavoriteArticle}
-          />
-        ))
-      )}
-      <Pagination
-        items={props.articlesCount.count}
-        handleClick={props.handlePaginationClick}
-        selectedPage={props.selectedPage}
-        itemsPerPage={10}
-      />
-    </div>
-  );
-};
 
 enum SelectedFeed {
   Personal,
@@ -61,9 +30,7 @@ interface IHomeState {
 
 class Home extends React.Component<IHomeProps, IHomeState> {
   public readonly state = {
-    feed: this.props.isAuthenticated
-      ? SelectedFeed.Personal
-      : SelectedFeed.Global,
+    feed: SelectedFeed.Global,
     page: 0,
     tag: ""
   };
@@ -185,6 +152,11 @@ class Home extends React.Component<IHomeProps, IHomeState> {
                 </ul>
               </div>
               <ArticleList
+                loading={IsLoadingInProgress(
+                  this.props.loadingActions,
+                  ARTICLE_LIST_FETCH_SUCCESS,
+                  ARTICLE_FEED_LIST_FETCH_SUCCESS
+                )}
                 articles={this.props.articles}
                 articlesCount={this.props.articlesCount}
                 selectedPage={this.state.page}
@@ -201,6 +173,10 @@ class Home extends React.Component<IHomeProps, IHomeState> {
             <div className="col-md-3">
               <Sidebar title={"Popular Tags"}>
                 <TagsList
+                  loading={IsLoadingInProgress(
+                    this.props.loadingActions,
+                    TAGS_FETCH_SUCCESS
+                  )}
                   tags={this.props.tags}
                   onClick={this.handleTagClick}
                 />

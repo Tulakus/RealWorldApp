@@ -11,6 +11,7 @@ import {
   FAVORITE_ARTICLE_SUCCESS,
   UNFAVORITE_ARTICLE_SUCCESS
 } from "../reducers/article";
+import { FETCH_EDIT_ARTICLE_SUCCESS } from "../reducers/article-editor";
 import { LOGIN_SUCCESS } from "../reducers/authentication";
 import {
   USER_INFO_CHANGED_SUCCESSFULLY,
@@ -146,6 +147,12 @@ export const getArticle = (data: IArticleQuery) =>
     ARTICLE_FETCH_SUCCESS
   );
 
+export const getArticleEdit = (slug: string) =>
+  F.get(
+    `https://conduit.productionready.io/api/articles/${slug}`,
+    FETCH_EDIT_ARTICLE_SUCCESS
+  );
+
 export interface IArticleCommentsQuery {
   slug: string;
 }
@@ -200,8 +207,8 @@ export interface IEditArticleRequest {
   };
 }
 
-export const editArticle = (data: IEditArticleRequest, slug: string) =>
-  F.post(
+export const updateArticle = (data: IEditArticleRequest, slug: string) =>
+  F.put(
     `https://conduit.productionready.io/api/articles/${slug}`,
     ARTICLE_CHANGED_SUCCESS,
     data

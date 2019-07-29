@@ -37,9 +37,9 @@ export function errorHandlingReducer(
     case CLEAN_ERRORS:
       return state.errors === undefined
         ? state
-        : Object.assign({}, state, {
-            fetchError: undefined
-          });
+        : {
+            errors: undefined
+          };
     default:
       return state;
   }

@@ -9,23 +9,13 @@ import { Button, ButtonCounter } from "../components/button";
 import { Card } from "../components/card";
 import { getDate } from "../helpers/helper";
 import { IArticle } from "../interfaces/IArticle";
+import { IAuthor } from "../interfaces/IAuthor";
 import { IComment } from "../interfaces/IComment";
 import {
   IArticleProps,
   mapDispatchToProps,
   mapStateToProps
 } from "../reducers/article";
-
-// export interface IProps {
-//   img?: string;
-//   userName: string;
-//   date: string;
-//   favoriteCount?: number;
-//   favorited: boolean;
-//   following: boolean;
-//   followCount?: number;
-//   slug: string;
-// }
 
 interface IMatchParams {
   slug: string;
@@ -66,11 +56,62 @@ class ArticlePage extends React.Component<IProps> {
     this.props.fetchArticleComments({ slug: this.props.match.params.slug });
   }
 
-  public render() {
-    // tslint:disable-next-line:no-debugger
+  public createNotPersonal(article: IArticle) {
+    const author: IAuthor = article.author;
+    const userName: string = author.username;
+    const favoriteAction = article.favorited
+      ? this.unfavoriteArticle
+      : this.favoriteArticle;
+    const followAction = author.following
+      ? this.unfollowAuthor
+      : this.followAuthor;
 
+    return (
+      <React.Fragment>
+        <Button
+          iconClass="ion-plus-round"
+          label={
+            article.author.following
+              ? `Unfollow ${userName}`
+              : `Follow ${userName}`
+          }
+          buttonClassName="btn btn-sm btn-outline-secondary"
+          onClickHandler={() => followAction(userName)}
+        />
+        &nbsp;&nbsp;
+        <ButtonCounter
+          iconClass="ion-heart"
+          label={article.favorited ? "Unfavorite Post" : "Favorite Post"}
+          buttonClassName="btn btn-sm btn-outline-primary"
+          counter={article.favoritesCount || 0}
+          onClickHandelr={e => favoriteAction(article.slug)}
+        />
+      </React.Fragment>
+    );
+  }
+
+  public createPersonal(article: IArticle) {
+    return (
+      <React.Fragment>
+        <Button
+          iconClass="ion-edit"
+          label={"Edit Article"}
+          buttonClassName="btn btn-sm btn-outline-secondary"
+          onClickHandler={() => this.editArtcile(article.slug)}
+        />
+        &nbsp;&nbsp;
+        <Button
+          iconClass="ion-trash-a"
+          label={"Delete Article"}
+          buttonClassName="btn btn-sm btn-outline-danger"
+          onClickHandler={e => this.deleteArticle(e, article.slug)}
+        />
+      </React.Fragment>
+    );
+  }
+  public render() {
     const article: IArticle = this.props.article;
-    const author = article.author;
+    const author: IAuthor = article.author;
 
     if (
       Object.entries(article).length === 0 &&
@@ -79,12 +120,7 @@ class ArticlePage extends React.Component<IProps> {
       return <div>Loading</div>;
     }
     const userName = author.username;
-    const favoriteAction = article.favorited
-      ? this.unfavoriteArticle
-      : this.favoriteArticle;
-    const followAction = author.following
-      ? this.unfollowAuthor
-      : this.followAuthor;
+
     return (
       <div className="article-page">
         {
@@ -94,46 +130,11 @@ class ArticlePage extends React.Component<IProps> {
               userName={!!article.author && article.author.username}
               date={article.createdAt}
             >
-              {false ? (
-                <React.Fragment>
-                  <Button
-                    iconClass="ion-plus-round"
-                    label={
-                      article.author.following
-                        ? `Unfollow ${userName}`
-                        : `Follow ${userName}`
-                    }
-                    buttonClassName="btn btn-sm btn-outline-secondary"
-                    onClickHandler={() => followAction(userName)}
-                  />
-                  &nbsp;&nbsp;
-                  <ButtonCounter
-                    iconClass="ion-heart"
-                    label={
-                      article.favorited ? "Unfavorite Post" : "Favorite Post"
-                    }
-                    buttonClassName="btn btn-sm btn-outline-primary"
-                    counter={article.favoritesCount || 0}
-                    onClickHandelr={e => favoriteAction(article.slug)}
-                  />
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
-                  <Button
-                    iconClass="ion-edit"
-                    label={"Edit Article"}
-                    buttonClassName="btn btn-sm btn-outline-secondary"
-                    onClickHandler={() => this.editArtcile(article.slug)}
-                  />
-                  &nbsp;&nbsp;
-                  <Button
-                    iconClass="ion-trash-a"
-                    label={"Delete Article"}
-                    buttonClassName="btn btn-sm btn-outline-danger"
-                    onClickHandler={e => this.deleteArticle(e, article.slug)}
-                  />
-                </React.Fragment>
-              )}
+              {!this.props.isLogged
+                ? null
+                : this.props.currentUser!.username === article.author.username
+                ? this.createPersonal(article)
+                : this.createNotPersonal(article)}
             </ArticleMeta>
           </Banner>
         }
@@ -174,7 +175,9 @@ class ArticlePage extends React.Component<IProps> {
                 <Card
                   isEditing={true}
                   img={
-                    (!!this.props.user && this.props.user.image) || undefined
+                    (!!this.props.currentUser &&
+                      this.props.currentUser.image) ||
+                    undefined
                   }
                   addComment={this.props.sendCommnent}
                   slug={this.props.article.slug}
@@ -189,8 +192,9 @@ class ArticlePage extends React.Component<IProps> {
                     date={getDate(comment.createdAt)}
                     isAuthor={
                       this.props.isLogged &&
-                      !!this.props.user &&
-                      comment.author.username === this.props.user.username
+                      !!this.props.currentUser &&
+                      comment.author.username ===
+                        this.props.currentUser.username
                     }
                     addComment={this.props.sendCommnent}
                     slug={this.props.article.slug}

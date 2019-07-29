@@ -1,18 +1,35 @@
 import { ThunkDispatch } from "redux-thunk";
-import { addArticle, IAddArticleRequest } from "../helpers/apiHelper";
+import {
+  addArticle,
+  getArticleEdit,
+  IAddArticleRequest,
+  updateArticle
+} from "../helpers/apiHelper";
 import { navigate } from "../helpers/helper";
+import { IArticle } from "../interfaces/IArticle";
 import { IError } from "../interfaces/IError";
 import { IAppState } from "../store/rootReducer";
 import { changeValue, IChangeValueAction } from "./actions/changeValueAction";
 
 const ARTICLE_VALUE_CHANGED = "ARTICLE_VALUE_CHANGED";
 const TAG_ADDED = "TAG_ADDED";
+export const FETCH_EDIT_ARTICLE_SUCCESS = "FETCH_EDIT_ARTICLE_SUCCESS";
+const EDITOR_LEFT = "EDITOR_LEFT";
 
 interface IArticleValueChanged
   extends IChangeValueAction<typeof ARTICLE_VALUE_CHANGED> {}
 interface ITagAddedAction {
   type: typeof TAG_ADDED;
   tag: string;
+}
+
+interface IArticleEditedAction {
+  type: typeof FETCH_EDIT_ARTICLE_SUCCESS;
+  payload: string;
+}
+
+interface IOnDestroyArticleEditorAction {
+  type: typeof EDITOR_LEFT;
 }
 
 function addTag(tag: string): ITagAddedAction {
@@ -22,15 +39,23 @@ function addTag(tag: string): ITagAddedAction {
   };
 }
 
-type ArticleActionTypes = IArticleValueChanged | ITagAddedAction;
+type ArticleActionTypes =
+  | IArticleValueChanged
+  | ITagAddedAction
+  | IArticleEditedAction
+  | IOnDestroyArticleEditorAction;
 
-const initialState: IArticleEditorState = {
-  about: "",
-  content: "",
-  tag: "",
-  tagList: [],
-  title: ""
-};
+function createInitState() {
+  return {
+    about: "",
+    content: "",
+    editing: false,
+    tag: "",
+    tagList: [],
+    title: ""
+  };
+}
+const initialState: IArticleEditorState = createInitState();
 
 export function editorReducer(
   state: IArticleEditorState = initialState,
@@ -45,6 +70,18 @@ export function editorReducer(
         tag: "",
         tagList: [...state.tagList, action.tag]
       };
+    case FETCH_EDIT_ARTICLE_SUCCESS:
+      const article: IArticle = JSON.parse(action.payload).article;
+      return {
+        about: article.description,
+        content: article.body,
+        editing: true,
+        tag: "",
+        tagList: article.tagList,
+        title: article.title
+      };
+    case EDITOR_LEFT:
+      return createInitState();
     default:
       return state;
   }
@@ -56,6 +93,7 @@ export interface IArticleEditorState {
   content: string;
   tag: string;
   tagList: string[];
+  editing: boolean;
 }
 
 interface IMapStateToProps {
@@ -65,6 +103,7 @@ interface IMapStateToProps {
   tag: string;
   tagList: string[];
   errors?: IError;
+  editing: boolean;
 }
 
 export const mapStateToProps = (
@@ -74,6 +113,7 @@ export const mapStateToProps = (
   return {
     about: state.editor.about,
     content: state.editor.content,
+    editing: state.editor.editing,
     errors: state.error.errors,
     tag: state.editor.tag,
     tagList: state.editor.tagList,
@@ -82,16 +122,39 @@ export const mapStateToProps = (
 };
 
 interface IMapDispatchToProps {
-  submit: (data: IAddArticleRequest) => void;
+  addSubmit: (data: IAddArticleRequest) => void;
+  editSubmit: (data: IAddArticleRequest, slug: string) => void;
   onValueChange: (key: string, value: string) => void;
   onTagAdd: (value: string) => void;
+  getArticle: (slug: string) => void;
+  onDestroy: () => void;
 }
 
 export const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, any>,
+  dispatch: ThunkDispatch<IArticleEditorState, {}, any>,
   ownprops: any
 ): IMapDispatchToProps => {
   return {
+    addSubmit: async (data: IAddArticleRequest) => {
+      try {
+        const response = await dispatch(addArticle(data));
+        navigate(ownprops, `/article/${response.article.slug}`);
+      } catch (e) {
+        console.log(e); // todo: better error handling
+      }
+    },
+    editSubmit: async (data: IAddArticleRequest, slug: string) => {
+      try {
+        const response = await dispatch(updateArticle(data, slug));
+        navigate(ownprops, `/article/${response.article.slug}`);
+      } catch (e) {
+        console.log(e); // todo: better error handling
+      }
+    },
+    getArticle: (slug: string) => {
+      dispatch(getArticleEdit(slug));
+    },
+    onDestroy: () => dispatch({ type: EDITOR_LEFT }),
     onTagAdd: value => dispatch(addTag(value)),
     onValueChange: (key: string, value: string) =>
       dispatch(
@@ -100,16 +163,10 @@ export const mapDispatchToProps = (
           value,
           ARTICLE_VALUE_CHANGED
         )
-      ),
-    submit: async (data: IAddArticleRequest) => {
-      try {
-        const response = await dispatch(addArticle(data));
-        navigate(ownprops, `/article/${response.article.slug}`);
-      } catch (e) {
-        console.log(e); // todo: better error handling
-      }
-    }
+      )
   };
 };
 
-export interface IProps extends IMapStateToProps, IMapDispatchToProps {}
+export interface IArticleEditorProps
+  extends IMapStateToProps,
+    IMapDispatchToProps {}

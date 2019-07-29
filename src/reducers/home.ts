@@ -37,6 +37,7 @@ export interface IMapStateToProps {
   articles: IArticle[];
   articlesCount: { count: number };
   tags: string[];
+  loadingActions: string[];
 }
 
 export type LoginActionTypes = IFetchedTagsDataAction;
@@ -107,6 +108,7 @@ export const mapStateToProps = (
   return {
     articles: state.article.articles,
     articlesCount: state.article.articlesCount,
+    loadingActions: state.loader.loadingActions,
     tags: state.home.tags
   };
 };

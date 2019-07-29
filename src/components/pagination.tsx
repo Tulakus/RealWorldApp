@@ -10,10 +10,13 @@ interface IPagination {
 }
 
 const createPagination = (props: IPagination) => {
-  const pages = [];
+  const pages: JSX.Element[] = [];
   const pagesCount: number = Math.ceil(
     props.items / (props.itemsPerPage || DEFAULT_ITEMS_PER_PAGE)
   );
+  if (pagesCount === 1) {
+    return pages;
+  }
   for (let i = 0; i < pagesCount; i++) {
     pages.push(
       <li

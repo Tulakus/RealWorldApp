@@ -17,9 +17,9 @@ interface IRegistrationState {
 
 class Register extends React.Component<IRegistrationProps, {}> {
   public readonly state: IRegistrationState = {
-    email: "tulakuss@realworld.com",
-    password: "Password*",
-    username: "tulakuss"
+    email: "",
+    password: "",
+    username: ""
   };
   @boundMethod
   public handleChange(e: any, key: string) {
@@ -35,6 +35,12 @@ class Register extends React.Component<IRegistrationProps, {}> {
         username: this.state.username || ""
       }
     });
+  }
+  public componentWillUnmount() {
+    if (this.props.errors === undefined) {
+      return;
+    }
+    this.props.clean();
   }
   public render() {
     return (
